@@ -20,8 +20,6 @@
     '("bf" 1)
     '("emph" 1)
     "ntitle"
-    "needcrop"
-    "fancysec"
     "sign")
    (LaTeX-add-labels
     "eq:mtx-sign")

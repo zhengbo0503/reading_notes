@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.1) (preloaded format=pdflatex 2023.2.1)  5 FEB 2023 18:42
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.1) (preloaded format=pdflatex 2023.2.1)  5 FEB 2023 18:44
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -905,33 +905,6 @@ Package: inputenc 2021/02/14 v1.3d Input encoding file
 \inpenc@prehook=\toks49
 \inpenc@posthook=\toks50
 )
-(/Users/clement/Library/Application Support/MiKTeX/texmfs/install/tex/latex/cro
-p/crop.sty
-Package: crop 2017/11/19 1.10 crop marks (mf)
-
-(/Library/Application Support/MiKTeX/texmfs/install/tex/generic/iftex/ifluatex.
-sty
-Package: ifluatex 2019/10/25 v1.5 ifluatex legacy package. Use iftex instead.
-)
-\CROP@index=\count337
-\CROP@offset=\count338
-Package crop Info: Local config file crop.cfg used on input line 622.
-
-(/Library/Application Support/MiKTeX/texmfs/install/tex/xelatex/xetexconfig/cro
-p.cfg))
-(/Library/Application Support/MiKTeX/texmfs/install/tex/latex/titlesec/titlesec
-.sty
-Package: titlesec 2021/07/05 v2.14 Sectioning titles
-\ttl@box=\box74
-\beforetitleunit=\skip75
-\aftertitleunit=\skip76
-\ttl@plus=\dimen284
-\ttl@minus=\dimen285
-\ttl@toksa=\toks51
-\titlewidth=\dimen286
-\titlewidthlast=\dimen287
-\titlewidthfirst=\dimen288
-)
 Package hyperref Info: Option `hypertexnames' set `false' on input line 112.
 Package hyperref Info: Option `colorlinks' set `true' on input line 112.
 
@@ -943,34 +916,34 @@ Library (tcolorbox): 'tcbbreakable.code.tex' version '5.1.1'
 Package: pdfcol 2022-09-21 v1.7 Handle new color stacks for pdfTeX (HO)
 )
 Package pdfcol Info: New color stack `tcb@breakable' = 1 on input line 23.
-\tcb@testbox=\box75
-\tcb@totalupperbox=\box76
-\tcb@totallowerbox=\box77
+\tcb@testbox=\box74
+\tcb@totalupperbox=\box75
+\tcb@totallowerbox=\box76
 )
-\c@theorem=\count339
+\c@theorem=\count337
 LaTeX Font Info:    Redeclaring math version `bold' on input line 258.
 
 (/Library/Application Support/MiKTeX/texmfs/install/tex/latex/listings/listings
 .sty
-\lst@mode=\count340
-\lst@gtempboxa=\box78
-\lst@token=\toks52
-\lst@length=\count341
-\lst@currlwidth=\dimen289
-\lst@column=\count342
-\lst@pos=\count343
-\lst@lostspace=\dimen290
-\lst@width=\dimen291
-\lst@newlines=\count344
-\lst@lineno=\count345
-\lst@maxwidth=\dimen292
+\lst@mode=\count338
+\lst@gtempboxa=\box77
+\lst@token=\toks51
+\lst@length=\count339
+\lst@currlwidth=\dimen284
+\lst@column=\count340
+\lst@pos=\count341
+\lst@lostspace=\dimen285
+\lst@width=\dimen286
+\lst@newlines=\count342
+\lst@lineno=\count343
+\lst@maxwidth=\dimen287
 
 (/Library/Application Support/MiKTeX/texmfs/install/tex/latex/listings/lstmisc.
 sty
 File: lstmisc.sty 2020/03/24 1.8d (Carsten Heinz)
-\c@lstnumber=\count346
-\lst@skipnumbers=\count347
-\lst@framebox=\box79
+\c@lstnumber=\count344
+\lst@skipnumbers=\count345
+\lst@framebox=\box78
 )
 (/Library/Application Support/MiKTeX/texmfs/install/tex/latex/listings/listings
 .cfg
@@ -1081,17 +1054,17 @@ Package lastpage Info: Please have a look at the pageslts package at
 (/Library/Application Support/MiKTeX/texmfs/install/tex/context/base/mkii/supp-
 pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count348
-\scratchdimen=\dimen293
-\scratchbox=\box80
-\nofMPsegments=\count349
-\nofMParguments=\count350
-\everyMPshowfont=\toks53
-\MPscratchCnt=\count351
-\MPscratchDim=\dimen294
-\MPnumerator=\count352
-\makeMPintoPDFobject=\count353
-\everyMPtoPDFconversion=\toks54
+\scratchcounter=\count346
+\scratchdimen=\dimen288
+\scratchbox=\box79
+\nofMPsegments=\count347
+\nofMParguments=\count348
+\everyMPshowfont=\toks52
+\MPscratchCnt=\count349
+\MPscratchDim=\dimen289
+\MPnumerator=\count350
+\makeMPintoPDFobject=\count351
+\everyMPtoPDFconversion=\toks53
 )
 (/Library/Application Support/MiKTeX/texmfs/install/tex/latex/epstopdf-pkg/epst
 opdf-base.sty
@@ -1145,10 +1118,7 @@ File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-Package crop Info: requested driver: `' on input line 17.
-Package crop Info: detected driver: `pdftex' on input line 17.
-Package crop Info: using `pdftex' graphics driver on input line 17.
-\c@lstlisting=\count354
+\c@lstlisting=\count352
 LaTeX Font Info:    Calculating math sizes for size <14.39996> on input line 20
 .
 LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 2
@@ -1246,17 +1216,13 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 
-[1{/Users/clement/Library/Application Support/MiKTeX/texmfs/data/fonts/map/pdft
-ex/pdftex.map}
+[1
 
-] [2] (do.bbl (do.brf)
+{/Users/clement/Library/Application Support/MiKTeX/texmfs/data/fonts/map/pdftex
+/pdftex.map}] [2] (do.bbl (do.brf)
 \tf@brf=\write5
 \openout5 = `do.brf'.
 
-LaTeX Font Info:    Font shape `T1/lmr/bx/sc' in size <12> not available
-(Font)              Font shape `T1/cmr/bx/sc' tried instead on input line 1.
-LaTeX Font Info:    Font shape `T1/lmr/bx/sc' in size <17.28003> not available
-(Font)              Font shape `T1/cmr/bx/sc' tried instead on input line 1.
 ) 
 AED: lastpage setting LastPage
 [3] (do.aux)
@@ -1264,41 +1230,40 @@ Package rerunfilecheck Info: File `do.brf' has not changed.
 (rerunfilecheck)             Checksum: 128DAFE7E26A15277D2F3E09262EAFE2;342.
  ) 
 Here is how much of TeX's memory you used:
- 28906 strings out of 475245
- 538091 string characters out of 2769424
- 1134807 words of memory out of 3000000
- 49668 multiletter control sequences out of 15000+600000
- 566635 words of font info for 198 fonts, out of 8000000 for 9000
+ 28439 strings out of 475245
+ 530960 string characters out of 2769424
+ 1122715 words of memory out of 3000000
+ 49211 multiletter control sequences out of 15000+600000
+ 568480 words of font info for 199 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  104i,12n,107p,1001b,1160s stack positions out of 10000i,1000n,20000p,200000b,80000s
 {/Library/Application Support/MiKTeX/texmfs/install/fonts/enc/dvips/lm/lm-ec.
-enc}{/Library/Application Support/MiKTeX/texmfs/install/fonts/enc/dvips/cm-supe
-r/cm-super-t1.enc}{/Library/Application Support/MiKTeX/texmfs/install/fonts/enc
-/dvips/lm/lm-ts1.enc}{/Library/Application Support/MiKTeX/texmfs/install/fonts/
-enc/dvips/lm/lm-mathex.enc}{/Library/Application Support/MiKTeX/texmfs/install/
-fonts/enc/dvips/lm/lm-mathsy.enc}{/Library/Application Support/MiKTeX/texmfs/in
-stall/fonts/enc/dvips/lm/lm-rm.enc}{/Library/Application Support/MiKTeX/texmfs/
-install/fonts/enc/dvips/lm/lm-mathit.enc}</Library/Application Support/MiKTeX/t
-exmfs/install/fonts/type1/public/lm/lmbx10.pfb></Library/Application Support/Mi
-KTeX/texmfs/install/fonts/type1/public/lm/lmex10.pfb></Library/Application Supp
-ort/MiKTeX/texmfs/install/fonts/type1/public/lm/lmmi12.pfb></Library/Applicatio
-n Support/MiKTeX/texmfs/install/fonts/type1/public/lm/lmmi8.pfb></Library/Appli
-cation Support/MiKTeX/texmfs/install/fonts/type1/public/lm/lmr10.pfb></Library/
-Application Support/MiKTeX/texmfs/install/fonts/type1/public/lm/lmr12.pfb></Lib
-rary/Application Support/MiKTeX/texmfs/install/fonts/type1/public/lm/lmr17.pfb>
-</Library/Application Support/MiKTeX/texmfs/install/fonts/type1/public/lm/lmr7.
-pfb></Library/Application Support/MiKTeX/texmfs/install/fonts/type1/public/lm/l
-mr8.pfb></Library/Application Support/MiKTeX/texmfs/install/fonts/type1/public/
-lm/lmri10.pfb></Library/Application Support/MiKTeX/texmfs/install/fonts/type1/p
-ublic/lm/lmri12.pfb></Library/Application Support/MiKTeX/texmfs/install/fonts/t
-ype1/public/lm/lmss12.pfb></Library/Application Support/MiKTeX/texmfs/install/f
-onts/type1/public/lm/lmsy10.pfb></Library/Application Support/MiKTeX/texmfs/ins
-tall/fonts/type1/public/lm/lmsy8.pfb></Library/Application Support/MiKTeX/texmf
-s/install/fonts/type1/public/lm/lmtt10.pfb></Library/Application Support/MiKTeX
-/texmfs/install/fonts/type1/public/cm-super/sfxc1728.pfb>
-Output written on do.pdf (3 pages, 280783 bytes).
+enc}{/Library/Application Support/MiKTeX/texmfs/install/fonts/enc/dvips/lm/lm-t
+s1.enc}{/Library/Application Support/MiKTeX/texmfs/install/fonts/enc/dvips/lm/l
+m-mathex.enc}{/Library/Application Support/MiKTeX/texmfs/install/fonts/enc/dvip
+s/lm/lm-mathsy.enc}{/Library/Application Support/MiKTeX/texmfs/install/fonts/en
+c/dvips/lm/lm-rm.enc}{/Library/Application Support/MiKTeX/texmfs/install/fonts/
+enc/dvips/lm/lm-mathit.enc}</Library/Application Support/MiKTeX/texmfs/install/
+fonts/type1/public/lm/lmbx10.pfb></Library/Application Support/MiKTeX/texmfs/in
+stall/fonts/type1/public/lm/lmbx12.pfb></Library/Application Support/MiKTeX/tex
+mfs/install/fonts/type1/public/lm/lmex10.pfb></Library/Application Support/MiKT
+eX/texmfs/install/fonts/type1/public/lm/lmmi12.pfb></Library/Application Suppor
+t/MiKTeX/texmfs/install/fonts/type1/public/lm/lmmi8.pfb></Library/Application S
+upport/MiKTeX/texmfs/install/fonts/type1/public/lm/lmr10.pfb></Library/Applicat
+ion Support/MiKTeX/texmfs/install/fonts/type1/public/lm/lmr12.pfb></Library/App
+lication Support/MiKTeX/texmfs/install/fonts/type1/public/lm/lmr17.pfb></Librar
+y/Application Support/MiKTeX/texmfs/install/fonts/type1/public/lm/lmr7.pfb></Li
+brary/Application Support/MiKTeX/texmfs/install/fonts/type1/public/lm/lmr8.pfb>
+</Library/Application Support/MiKTeX/texmfs/install/fonts/type1/public/lm/lmri1
+0.pfb></Library/Application Support/MiKTeX/texmfs/install/fonts/type1/public/lm
+/lmri12.pfb></Library/Application Support/MiKTeX/texmfs/install/fonts/type1/pub
+lic/lm/lmss12.pfb></Library/Application Support/MiKTeX/texmfs/install/fonts/typ
+e1/public/lm/lmsy10.pfb></Library/Application Support/MiKTeX/texmfs/install/fon
+ts/type1/public/lm/lmsy8.pfb></Library/Application Support/MiKTeX/texmfs/instal
+l/fonts/type1/public/lm/lmtt10.pfb>
+Output written on do.pdf (3 pages, 291935 bytes).
 PDF statistics:
- 160 PDF objects out of 1000 (max. 8388607)
- 24 named destinations out of 1000 (max. 500000)
- 56333 words of extra memory for PDF output out of 61914 (max. 10000000)
+ 161 PDF objects out of 1000 (max. 8388607)
+ 25 named destinations out of 1000 (max. 500000)
+ 57357 words of extra memory for PDF output out of 61914 (max. 10000000)
 
