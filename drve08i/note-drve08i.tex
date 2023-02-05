@@ -1,0 +1,816 @@
+\documentclass{article}
+\def\ntitle {Notes for \texttt{drve08i}}
+% \def\nauthor{ } % default author is Zhengbo Zhou
+% \def\notes{ } % default is the submitted version
+\def\ndate{ 21 January 2023 } % default is today's date
+% def\needcrop{ } % crop for easy previewing
+\input{/Users/clement/bibtex/clem.tex}
+
+\renewcommand{\comment}[1]{\textsf{\color{blue} #1}}
+
+\begin{document}
+\maketitle
+% \tableofcontents
+\thispagestyle{firstpage} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% MAIN ARTICLE %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{abstract}
+  \emph{The paper mentioned in this notes is \cite{drve08i}.}
+  This paper gives a detailed preconditioning method on the classical
+  cyclic one-sided Jacobi SVD algorithm. 
+  % 1. What did the authors try to accomplish?
+  The authors achieved a fast (comparable with the QR algorithm) and
+  accurate Jacobi SVD algorithm for any matrix $X$. Moreover, the authors
+  provided lots of intuitions and motivations on the QR preconditioning
+  methods not only in the sense of reducing dimension, but also in the
+  sense of faster convergence. 
+
+  % 2. What were the key elements of the approach 
+  The key element of this approach is the efficient QR preconditioners. The
+  authors not only focused on how to reduce the dimension (therefore
+  flops), but also on detecting the ``digonality'' of the implicit
+  diagonalization, special pivoting to boost the convergence, etc.
+  Moreover, the exciting part is how to construct the right handed singular
+  vector. Normally, one can intuitively accumulate the Jacobi rotations to
+  get the right handed singular vector matrix. However, the authors
+  considered the construction of that singular vector matrix as a solution
+  of the matrix equation $AX = B$ where $X$ is unknown, $B$ is any matrix
+  and $A$ is triangular. This can be done using \texttt{STRSM} which is
+  more efficient than just simply multiplying the orthogonal matrices
+  together. 
+\end{abstract}
+
+\section{Introduction}
+Jacobi first notice this method while solving the following system of equations
+\begin{equation}\notag
+  \left\{
+    \begin{array}{cccccccc}
+      \{(a, a)-x\} \alpha & + & (a, b) \beta & +
+      & (a, c) \gamma & +\cdots+ & (a, p) \tilde{\omega} & =0 \\
+      (b, a) \alpha & + & \{(b, b)-x\} \beta & +
+      & (b, c) \gamma & +\cdots+ & (b, p) \tilde{\omega} & =0 \\
+      (c, a) \alpha & + & (c, b) \beta & +
+      & \{(c, c)-x\} \gamma & +\cdots+ & (c, p) \tilde{\omega} & =0 \\
+      (p, a) \alpha & + & (p, b) \beta & +
+      & (p, c) \gamma & +\cdots+ & \{(p, p)-x\} \tilde{\omega} & =0
+    \end{array}
+  \right.
+\end{equation}
+where the coefficients are symmetric, i.e. $(a,b) = (b,a), (a,c) = (c,a),
+\dots, (b,c) = (c,b)$ etc. In our notation 
+\begin{equation}\notag
+  H =
+  \begin{pmatrix}
+    (a,a) & (a,b) & (a,c) & \dots & (a,p) \\
+    (b,a) & (b,b) & (b,c) & \dots & (b,p) \\
+    (c,a) & (c,b) & (c,c) & \dots & (c,p) \\
+    \vdots {} & \vdots & \vdots & \ddots & \vdots \\
+    (p,a) & (p,b) & (p,c) & \cdots & (p,p) 
+  \end{pmatrix}  =  (H_{ij})^n_{i,j = 1} ,  
+  \quad u =
+  \begin{pmatrix}
+    \alpha \\ \beta \\ \gamma \\ \vdots \\ \tilde \omega 
+  \end{pmatrix}, \quad
+  (H = H^T)
+\end{equation}
+we obtain the equation $(H - \lambda I)u = 0$, which is to be solved for
+$\lambda$ and $u\neq 0$. The algorithm starts with $H^{(0)} = H$ and then
+it generates a sequence of congruences, $H^{(k+1)} =
+(V^{(k)})^TH^{(k)}V^{(k)}$, where $V^{(k)}$ is the plane rotation,
+i.e. $V^{(k)}$ differs from the identity only at the position $(p_k,p_k),
+(p_k,q_k),(q_k,p_k),(q_k,q_k)$ where
+\begin{equation}\notag
+  \begin{pmatrix}
+    V_{p_k,p_k}^{(k)} & V_{p_k,q_k}^{(k)} \\
+    V_{q_k,p_k}^{(k)} & V_{q_k,q_k}^{(k)} 
+  \end{pmatrix} =
+  \begin{pmatrix}
+    \cos(\phi_k) & \sin(\phi_k) \\ -\sin(\phi_k) & \cos(\phi_k) 
+  \end{pmatrix}. 
+\end{equation}
+The angle $\phi_k$ is determined to annihilate the $(p_k,q_k)$ and
+$(q_k,p_k)$ positions in $H^{(k)}$, and it is carefully chosen such that we
+always take $\phi_k$ as the smaller roots which ensures the convergence.
+
+\subsection{History}
+The advent of electronic computing machinery opened a new chapter in
+numerical mathematics and the Jacobi method becomes attractive tool for
+computing the eigenvalues of symmetric matrices. Around 1950, Goldstine,
+Murray and von Neumann~\cite{gmv59} rediscover the method and had detailed
+implementation and error analysis. It was used by \bf{Hessenberg} in 1940,
+by \bf{Wilkinson} in 1947 at the NPL, and by \bf{Bodewig} in 1949.
+
+\subsection{A Bit Word on the Jacobi}
+The convergence is easily monitored by using the off-norm,
+\begin{equation}\notag
+  \Omega(H) = \sqrt{\sum_{i\neq j} H^2_{ij}},
+\end{equation}
+for which one easily shows the monotonicity 
+\begin{equation}\notag
+  \Omega(H^{(k+1)}) = \Omega(H^{(k)})-2(H^{(k)})^{2}_{p_k,q_k}\leq \Omega(H^k)
+\end{equation}
+Under suitable pivoting strategy, the sequence $(H^{(k)})_{k = 0}^{\infty}$
+converges to $\Lambda$ and the accumulated product
+$V\iter{0}V\iter{1}\cdots V\iter{k}\cdots$ converges to the orthogonal
+matrix $V$ of eigenvectors of $H$, $HV = V\Lambda$. 
+
+\subsection{Convergence} 
+
+Jacobi proved that the convergence of a greedy approach that annihilates
+the absolutely largest off-diagonal entry at each step. The greed strategy
+is usually replaced with the row-cyclic strategy, first used
+by~\cite{greg53}, which is periodic and in one full sweep of $n(n-1)/2$
+rotations it rotates row-by-row at the pivot positions
+$(1,2),(1,3),\dots,(1,n); (2,3),\dots,(2,n); \dots; (n-1,n)$. Similarly,
+column-cyclic strategy scans the strict upper triangular of the matrix in
+column-by-column fashion. Forsythe and Henrici \cite{fohe60} proved the
+convergence of the serial Jacobi algorithm. \cite{scho61} and \cite{wilk62}
+proved the quadratic convergence in case of the simple eigenvalues and
+Hari~\cite{hari91} extended the result to the general case of multiple
+eigenvalues. Mascarenhas~\cite{masc95} and Rhee Hari~\cite{rhha93} showed
+that certain modification of row-cyclic strategy achieves cubic
+convergence. Rutishauser~\cite{ruti66} described detailed implementation of
+the method for real symmetric matrices.
+
+Goal: \bf{Mathematical software implementing the new algorithm should be
+  numerically sound and competitive in efficiency with the LAPACK's
+  implementations of the QR and the divide-and-conquer algorithms, or any
+  other bidiagonalization based procedure.}
+
+Previous Works
+\begin{itemize}
+ \item Jacobi method is more accurate than QR. \cite{deve92} 
+ \item Computing the Singular and the Generalized Singular Values.
+   \cite{drma94_PHD} 
+\item Implementation of Jacobi rotations for accurate singular value
+  computation in floating point arithmetic. \cite{drma97}
+\item A posteriori computation of the singular vectors in a preconditioned
+  Jacobi SVD algorithm \cite{drma99} 
+\end{itemize}
+
+The development is divided into the following 
+
+(i) Substantial modifications of the classical Jacobi SVD algorithm are
+necessary to reduce its complexity. Improve the convergence by
+preconditioner. Seek for zero and almost diagonal situation.
+
+(ii) The design of the algorithm should be open for further improvements.
+It should be based on building blocks which can benefit from the
+development of basic matrix computational routines (BLAS, LAPACK etc.) and
+blocked versions of Jacobi rotations, but without trading the numerical
+accuracy. 
+
+The structure of the paper:
+\begin{itemize}
+\item Section 2: Quick introduction to the numerical analysis of the
+  symmetric definite eigenvalue problem and the SVD.
+\item Section 3: Description of the preconditioning.
+\item Section 4: Discuss whether put $A^T$ or $A$ into the algorithm. 
+\item Section 5: Basic structure of the new Jacobi SVD problem.
+\end{itemize}
+
+\section{Accuracy and Backward Stability in SVD Computation}
+
+Let $H$ be $n\times n$ symmetric positive definite matrix. An algorithm
+that computes the singular values $\wt \sigma_1\geq \cdots \geq \wt
+\sigma_n$ of a nearby matrix $A + \delta A$, where $\norm{\delta
+  A}\leq\epsilon A$ with some small $\epsilon$. Weyl's theorem implies 
+\begin{equation}\notag
+  \max_{i=1:n}\frac{|\wt \sigma_i-\sigma_i|}{\norm{A}}\leq
+\frac{\norm{\delta A}}{\norm{A}} \le \epsilon,
+\end{equation}
+and in the case of full column rank $A$, $A+\delta A = (I+\delta A
+A^{\dagger})A$ yields the bound 
+\begin{equation}\label{eq:fwd-error-sv}
+  \max_{i=1:n}\frac{|\wt \sigma_i-\sigma_i|}{\sigma_i} \leq 
+\norm{\delta A A^{\dagger}}.
+\end{equation}
+
+In general, $\delta A$ is dense with no particular structure which means
+that in the expression $\delta AA^{\dagger} = \delta
+AV\Sigma^{\dagger}U^T$, large singular values of $A^{\dagger} =
+V\Sigma^{\dagger}U^T$ may get excited by $\delta A$.
+
+\begin{example}
+  Bidiagonalization based SVD algorithm produces $\delta A$ for which the
+  best general upper bound is $\norm{\delta A} \leq \epsilon_B\norm{A}$
+and thus
+\begin{equation}\notag
+  \norm{\delta AA^{\dagger}}\le \frac{\norm{\delta A}}{\norm{A}}\kappa(A)
+\leq \epsilon_B\kappa(A),\quad \kappa(A) = \norm{A}\norm{A^{\dagger}}.
+\end{equation}
+In other words, if $\sigma_1\geq \dots \geq \sigma_k\gg \sigma_{k+1} \ge
+\dots \ge \sigma_n > 0$, then the dominant singular values
+$\sigma_1,\dots,\sigma_k$ will be computed accurately in the sense that 
+\begin{equation}\notag
+  \max_{i=1:k}\frac{\abs{\wt \sigma_i-\sigma_i}}{\sigma_i}\leq
+\frac{\norm{\delta A}}{\norm{A}} \frac{\sigma_1}{\sigma_k}, \qquad 
+\norm{\delta A}\le O(\epsilon)\norm{A},
+\end{equation}
+but the smallest one will have the error bound 
+\begin{equation}\notag
+  \frac{\abs{\wt \sigma_n - \sigma_n}}{\sigma_n} \le 
+\frac{\norm{\delta A}}{\norm{A}} \frac{\sigma_1}{\sigma_n}.
+\end{equation}
+Thus, if for some $i$, it holds $\sigma_i \approx \varepsilon \sigma_1 \ll
+\sigma_1 = \norm{A}$, then we \emph{cannot expect any correct digit in $\wt
+  \sigma_i$}
+\end{example}
+
+\bf{Why should we care about small singular values?} The question can also
+become, how small is small? What if we there is no clear cut such that we
+can make a low rank approximation, or we meet the devil's stairs,
+\begin{equation}\notag
+  \sigma_1 \ge \dots \ge \sigma_{k_{1}} \gg 
+\sigma_{k_1+1} \ge \dots \ge \sigma_{k_2} \gg
+\sigma_{k_2+1} \ge \dots \ge \sigma_{k_3} \gg
+\sigma_{k_3+1} \ge \dots \gg \sigma_{n}
+\end{equation}
+with $\sigma_{k_j+1}/\sigma_{k_j} \approx O(\epsilon)$. 
+
+\begin{quote}
+  In many important applications the smallest singular values are really
+  the noise excited by the uncertainty in the data and computing them to
+  high relative accuracy is meaningless and illusory. In such cases, the
+  Jacobi SVD algorithm has no advantage with respect to accuracy.
+
+  But given the adaptivity and  of the Jacobi algorithm to modern serial
+  and parallel computing machinery, it is exciting and challenging task to
+  improve the efficiency of the algorithm to make it competitive with
+  bidiagonalization based algorithms in terms of speed and memory usage,
+  even if the high relative accuracy of the smallest singular values is not
+  an issue. 
+\end{quote}
+
+\subsection{Basic floating point error analysis}
+
+
+\textbf{Fact 1.} If numerically orthogonal matrix $\wt Q$ ($\norm{\wt Q\tp \wt
+  Q - I} \ll 1$) is applied to an $m\times 1$ vector in floating point
+arithmetic. Then $computed(\wt Q x) = \wh Q(x+\delta x)$, where $\wh Q$ is
+orthogonal matrix close to $\wt Q$, and $\norm{\delta x} \leq \epsilon
+\norm{x}, \epsilon \leq f(k)\varepsilon $. Here $k$ is the number of
+coordinate directions changed under the action of $\wt Q$.
+
+\noindent\textbf{Fact 2.} If numerically orthogonal transformations $\wt
+Q_1,\dots, \wt Q_p$ are applied to \emph{disjoint parts of an vector $x$}:
+\begin{equation}\notag
+  x\mapsto y  = (\wt Q_1\oplus \cdots\oplus \wt Q_p)x, \quad x = 
+  \begin{pmatrix}
+    x^{(1)} \\ \vdots \\ x^{(p)}
+  \end{pmatrix}, 
+computed(\wt Q_ix^{(i)}) = \wh Q_i(x^{(i)} + \delta x^{(i)}),
+\end{equation}
+then we have 
+\begin{equation}\notag
+  \wt y \equiv computed(y) = (\wh Q_1\oplus \cdots \oplus \wh Q_p)(x
+  + \delta x), \qquad 
+\frac{\norm{\delta x}}{\norm{x}} \leq \max_{i = 1:p}\frac{\norm{\delta
+    x^{(i)}}}{\norm{x^{(i)}}}. 
+\end{equation}
+
+\noindent\textbf{Fact 3.} If $\wt Q_1,\dots,\wt Q_r$ are numerically
+orthogonal transformations, and if we need to compute $y = \wt Q_r\dots \wt
+Q_1 x$, then the computed approximation $\wt y$ satisfies 
+\begin{equation}\notag
+  \wt y = \wh Q_r\dots \wh Q_1(x + \delta x), \quad 
+  \norm{\delta x} \leq ((1+\epsilon)^r - 1)\norm{x},
+\end{equation}
+where $\epsilon$ is maximal relative backward error in application of any
+$\wt Q_1,\dots,\wt Q_r$, and $\wh Q_i$ is orthogonal matrix close to $\wt
+Q_i$.
+
+\begin{proposition}\label{prop:qr-errbd}
+  Let the Givens or Householder QR factorisation 
+  $
+  A = Q
+  \begin{pmatrix}
+    R \\ 0
+  \end{pmatrix}
+  $
+  of $A\in\R\mn$, $m\ge n$, be computed in the IEEE floating point
+  arithmetic with rounding relative error $\varepsilon < 10^{-7}$. Let the
+  computed approximations of $Q$ and $R$ be $\wt Q$ and $\wt R$,
+  respectively. Then, there exist an orthogonal matrix $\wt Q$ and a
+  backward perturbation $\delta A$ such that $A + \delta A = \wt Q
+  \begin{pmatrix}
+    \wt R \\ 0
+  \end{pmatrix}
+  $, where $\fnorm{\wt Q(:,i) - \wh Q(:,i)} \le \varepsilon_{qr}$ and 
+  $\norm{\delta A(:,i)} \leq \varepsilon_{qr}\norm{A(:,i)}$, $1\le i\le n$, 
+  hold with  
+  \begin{enumerate}
+\item
+  $\varepsilon_{qr}\le O(mn)\varepsilon$ for the Householder QR
+  factorisation.  
+\item 
+  $\varepsilon_{qr}\le (1+6\varepsilon)^p - 1$ for the Givens
+  factorisation. 
+  \end{enumerate}
+\end{proposition}
+
+\subsection{Condition Number and Scaling}\label{sec:cond-numb-scal}
+
+It is often that the matrix is composed as $A = BD$, $D =
+\diag(d_i)_{i=1}^n$, and the uncertainty is $A + \delta A = (B + \delta
+B)D$. In such case, $\delta A A ^{\dagger} = \delta BB^{\dagger}$.
+Moreover, the scaling, diagonal matrix $D$, which might be ill-conditioned,
+does not influence the forward perturbation of the singular values in
+(\ref{eq:fwd-error-sv}), i.e. 
+\begin{equation}\notag
+  \max_{i=1:n}\frac{|\wt \sigma_i-\sigma_i|}{\sigma_i} \leq 
+\norm{\delta A A^{\dagger}} = \norm{\delta BB^{\dagger}}.
+\end{equation}
+
+Similarly, if $A = DB$ (might be row scaling, instead of previous column
+scaling), and the uncertainty is $A + \delta A = D(B + \delta B)$, then we
+have the bound can also reduced to $B$ and $\delta B$. Hence, no matter how
+$A$ is ill-conditioned, as long as the condition number of the scaled $A$
+is low, we can have a sharp bound.
+
+Therefore, after we compute the QR factorisation of an $m\times n$ full
+column rank matrix $A$, we can conclude that the backward perturbation
+satisfies 
+\begin{equation}\notag
+  \norm{\delta AA^{\dagger}} = \norm{(\delta AD^{-1})(AD^{-1})^{\dagger}}
+  \leq  \norm{\delta AD^{-1}}\norm{(AD^{-1})^{\dagger}}\leq
+  \sqrt{n}\epsilon_{qr} \norm{A_c^{\dagger}},
+\end{equation}
+where $D = \diag(\norm{A(:,i)})_{i=1}^n$ and $A_c = AD^{-1}$. Moreover, we
+have the following proposition
+\begin{proposition}
+  Let $A$ and $\wt R$ be as in Proposition \ref{prop:qr-errbd}. If
+  $\sigma_1\ge \cdots  \ge \sigma_n > 0$ and $\wt \sigma_1 \ge \cdots \ge
+  \wt \sigma_n > 0$ are the singular values of $A$ and $\wt R$,
+  respectively, then  
+  \begin{equation}\notag
+    \max_{i = 1:n}\frac{|\wt \sigma_i-\sigma|}{\sigma_i} \leq  
+    \sqrt{n}\varepsilon_{qr}\norm{A_c^{\dagger}} \le n \varepsilon_{qr} 
+    \min_{\substack{S = \diag \\ \det(S)\neq 0}} \kappa(AS). 
+  \end{equation}
+\end{proposition}
+
+\emph{Conclusion: If $A$ is such that $\kappa(AS)$ is moderate for some
+  diagonal matrix $S$, then floating point $QR$ factorisation preserves all
+singular values -- they are all safely passed to the computed triangular
+factor $R$.} 
+
+Also note that, $R_c = RD^{-1}$ has unit columns and $\norm{R_c^{-1}} =
+\norm{A^{\dagger}_c}$. The note can stopped here, since all we need to know
+is that: doing QR factorizations, as long as the scaled $A$ is not too
+wild, then we can safely computing the SVD of $R$, its upper triangular QR
+factor, instead of the SVD of $A$.
+
+\section{Preconditioned Jacobi SVD algorithm}
+\label{sec:prec-jacobi-svd} 
+
+In case of $m \gg n$, the QR factorization of $A$, $A = Q
+\begin{pmatrix}
+  R \\ 0
+\end{pmatrix}
+$ reduces the computational complexity of all classical SVD method.
+
+\emph{The big picture from Bidiagonalization SVD.}
+Bidiagonalization based SVD algorithms reduce $A$ or $R$ to bidiagonal form
+in $4mn^{2} - 4n^3/3$ flops. Recent implementation of bidiagonalization
+substantially reduces the data transfer between main memory and cache. Thus
+iterative part of those algorithms runs on a bidiagonal matrix, and
+completes by assembling the orthogonal matrix QR factorization
+bidiagonalization from the bidiagonal SVD. If we add the fact that the full
+SVD of bidiagonal matrix can be computed very efficiently, then the picture
+is complete. \bf{Efficient preprocessing reduces the problem to the one
+  with super fast and ingenious solution. Efficient postprocessing
+  assembles all elements of the SVD.}
+
+Therefore, for Jacobi SVD algorithm, we can transform the problem from $m\times
+n$ matrix to $n\times n$. In the case of $m\gg n$, the QR factorization is an
+attractive preprocessor. Since the most expensive iterative part of the
+Jacobi SVD algorithm transforms $n$-dimensional vectors instead of
+$m$-dimensional one.
+
+\subsection{The QR factorisation as preprocessor}
+Using QR factorisation as efficient preprocessor for the Jacobi SVD routine
+is more subtle for several reasons:
+\begin{enumerate}
+  \item First, the matrix $R$ is not only smaller than $A$, in case $m >
+    n$, but it is also triangular which allows additional savings. For
+    instance, if we partition $R$ as 
+    \begin{equation}\notag
+      R =
+      \begin{pmatrix}
+        R_{[11]} & R_{[12]}\\ 0 & R_{[22]}
+      \end{pmatrix},
+    \end{equation}
+    where $R_{[11]}$ is $k\times k$, $k = \lfloor n/2 \rfloor$, then during
+    the first sweep $k(k-1)/2$ rotations of the columns $R_{[11]}$ can be
+    performed in a canonical $k$-dimensional subspace.
+  \item Second, since the Jacobi algorithm iterates on the full matrix, we
+    are interested not only in preprocessing (in the sense of dimensional
+    reduction described above), but also in preconditioning in the sense of
+    inducing fast convergence. This raises the question of \emph{How to
+      use QR factorization(s) to precondition the initial matrix $A$?}
+  \item Let $R = U_R\Sigma V_R^T$ be the SVD of $R$, where $V_R$ is the
+    (infinite) product of Jacobi rotations, and let both sets of singular
+    vectors be required ($U$ and $V$). If $R$ is nonsingular, then $V_R =
+    R^{-1}U_R\Sigma$. It is tempting to implement Jacobi algorithm without
+    accumulation of Jacobi rotations and to compute $V_R$ from triangular
+    matrix equation using BLAS 3 operation
+    \href{https://netlib.org/lapack/explore-html/db/dc9/group__single__blas__level3_ga9893cceb3ffc7ce400eee405970191b3.html}
+    {\texttt{STRSM}}
+    A fast rotation for two $n\times 1$ vectors has $4n$ flops, one sweep of
+    $n(n-1)/2$ rotations has $2n^3 - 2n^2$ BLAS 1 flops, while
+    \texttt{STRSM} has $n^3$ BLAS 3 flops. 
+\end{enumerate}
+
+\emph{How can the QR factorization serve as a preconditioner for better,
+  faster, convergence of the Jacobi algorithm?} This is achieved if the
+factorization is computed with column pivoting of Businger and
+Golub~\cite{bugo65}:
+\begin{equation}\label{eq:qr-col-pivoting}
+  AP = Q 
+  \begin{pmatrix}
+    R \\ 0
+  \end{pmatrix},
+\quad 
+\text{$P$ permutation such that }
+\abs{R_{ii}} \ge \sum_{k=i}^jR_{kj}^2, \quad 1 \le i < j \le n.
+\end{equation}
+
+Now, note that SVD of $R$ is implicit diagonalization of the matrix
+$R^TR$, and apply one-step of Rutishauser LR diagonalization method $R^TR
+\implies RR^T$ (\comment{may be like QR algorithm?}), which has
+a nontrivial diagonalizing effect. 
+
+This means, $RR^T$ is closer to diagonal form than $R^TR$. Note that 
+\begin{equation}\notag
+  \begin{pmatrix}
+    RR^T & 0 \\ 0 & 0 
+  \end{pmatrix} = 
+  Q^T(AA^T)Q, \qquad R^TR = P^T(A^TA)P,
+\end{equation}
+these two orthogonal similarities are substantially different.
+
+In terms of the Jacobi algorithm, it will translates to: \emph{One-sided
+  Jacobi SVD algorithm on $R^T$ should have better convergence than applied
+to $R$.} Therefore, by Veseli{\'c} and Hari~\ycite[1989, p.~631]{veha89},
+we have the following preconditioning method: Given a general $A\in\R\mn$,
+\begin{equation}\notag
+  AP = Q 
+  \begin{pmatrix}
+    R \\ 0
+  \end{pmatrix},
+  \qquad R^T = Q_1R_1,\qquad R_1^TP_1 = Q_2R_2.
+\end{equation}
+
+Moreover, it is known that \emph{simply sorting the columns of $A$ in
+  non-increasing order (in Euclidean norm) improves the convergence.} The
+best elaborated pivoting is the one by de Rijk~\cite[Sec.~2.4]{deri89}.
+
+The following proposition shows how the pivoting (\ref{eq:qr-col-pivoting})
+influences the condition number of the row-scaled matrix $R$.
+\begin{proposition}\label{fwd-sens-diag-scaling}
+  Let $R$ be a nonsingular upper triangular matrix and let
+  (\ref{eq:qr-col-pivoting}) hold. Let $R = \Delta_RR_r$, where $\Delta_R$
+  is the diagonal matrix of the Euclidean lengths of the rows of $R$, and
+  let $R = R_cD_R$, $D_R = \diag(\tnorm{R(:,i)})$. Then 
+  \begin{equation}\notag
+    \begin{aligned}
+      \tnorm{\abs{R_r^{-1}}} & \leq \sqrt{n} +
+                               \max_{i<j}\frac{(\Delta_R)_{jj}}{(D_R)_{ii}}
+                               \cdot \tnorm{\abs{R_c^{-1} -
+                               \diag(R_c^{-1})}} \\
+                            &  \leq \sqrt{n}
+                              \left (1+\max_{i<j}\frac{\abs{R_{jj}}}{\abs{R_{ii}}}
+                              \cdot \tnorm{\abs{R_c^{-1} -
+                              \diag(R_c^{-1})}}\right), \\
+      \tnorm{\abs{R_r^{-1}}} & \leq \sqrt{n} \tnorm{\abs{R_c^{-1}}} 
+    \end{aligned}
+  \end{equation}
+  where the matrix absolute value is defined element-wise. Moreover
+  $\norm{R_r^{-1}}$ is bounded by a function of $n$, independent of $A$.
+\end{proposition}
+
+\begin{remark}
+  Our understanding of the rank revealing property of the QR factorization
+  is different. \emph{If upper triangular factor in the column pivoted QR
+    factorization is written as $R = DY$ with diagonal $D$, where $D =
+    \diag(\abs{R_{ii}})_{i=1}^n$ or $D = \diag(\norm{R(i,:)})_{i=1}^n,
+    D_{ii} \geq D_{i+1,i=1}$, then determine the pivoting to minimize
+    $\kappa(Y) = \norm{Y^{-1}}\norm{Y}.$}
+\end{remark}
+
+Since the choice of $D$ and the diagonal dominance ensure that $\norm{Y}$
+is bounded by $O(n)$, the problem reduces to \emph{Minimising
+  $\norm{Y^{-1}}$.}
+Gu and Eisenstat has theoretical bound for $\norm{Y\inv}$ which is
+comparable to the Wilkinson's pivot growth factor $O(n^{\log_2n/4})$ in the
+Gaussian elimination with complete pivoting. The bound in case of the
+Businger-Golub pivoting is exponential in $n$. However, in practice,
+$\tnorm{Y\inv}$ is typically bounded by $O(n)$.
+
+\begin{remark}
+  If $m \gg n$, then the cost of the RRQR dominates the overall complexity
+  of the SVD computation. Since the pivoting can slow down the QR
+  factorization by a significant amount. \emph{It is reasonable that in
+    case $m\gg n$, the computation starts with the QR factorization without
+  pivoting just to reduce the dimension.}
+\end{remark}
+
+\section{Simple Question: $A$ or $A\tp$?}
+For the SVD of $A\tp$ is trivial to obtain from the SVD of $A$ and vice
+versa. If $A$ is $m\times n$ with $m > n$, then we prefer starting the
+computation with the RRQR of $A$. If $m < n$, then we choose to start with
+$A\tp$. But what if $A$ is square non-singular $n\times n$ matrix? 
+
+Consider an extreme example: $A = DQ$, where $D$ is diagonal and $Q$ is
+orthogonal. In that case, working with $A$ is implicit diagonalization of
+$Q\tp D^2Q$, while taking $A\tp$ implicitly diagonalizes diagonal matrix
+$D^2$. Therefore, we would like to find out \emph{which of the matrices
+  $A\tp A$ and $AA\tp$ is closer to the diagonality?} This is particularly
+useful when $A$ is not normal.
+
+Due to computational constraints, we only allow to make a decision at most
+$O(n^2)$ flops. The complexity corresponding to \emph{computing the
+  diagonal entries of $H = A\tp A$ and $M = AA\tp$.} Notice that $M$ and
+$H$ are orthogonally similar, therefore $\fnorm{H} = \fnorm{M}$. Moreover,
+we can compute the values $s(H) = \sum_{i=1}^nh_{ii} = \tr(H\circ H)$ and
+$s(M)$. \emph{Larger value of $s(\cdot)$ corresponding to smaller
+  $\mathrm{off}(\cdot)$.} 
+However, $s(\cdot)$ in floating point computation with round-off
+$\varepsilon$ completely ignores diagonal entries below
+$\sqrt{\varepsilon}$.
+
+\section{The Algorithms}
+Now, describe the structure of the Jacobi SVD algorithm with QR
+factorization as preconditioner and preprocessor. We consider the one-sided
+Jacobi as the following ``box'':
+\begin{equation}\notag
+  \text{Full column rank $X$} \implies \boxed{\text{One-sided Jacobi}}
+  \implies X_{\infty} = XV.
+\end{equation}
+The notation $\inner{\cdot}$ indicate the matrix that is not computed and
+no information about it is stored. The algorithms are designed such that
+avoiding accumulation of Jacobi rotations whenever possible.
+
+\subsection{Computing only $\Sigma$}
+
+In Algorithm~\ref{alg:only-sv}, we use two QR factorizations with pivoting
+and then apply the one-sided Jacobi SVD algorithm.
+\begin{algorithm}
+\caption{$\sigma = \texttt{svd}(A)$}
+\label{alg:only-sv}
+  \begin{algorithmic}[1]
+    \State {$(P_rA)P = \inner{Q}
+      \begin{pmatrix}
+        R \\ 0
+      \end{pmatrix}; \quad \rho = \rank(R);$}
+    \State $R(1:\rho,1:n)^TP_1 = \inner{Q_1}R_1;$
+    \State $X = R_1\tp; X_{\infty} = X\inner{V_x};$
+    \State $\sigma_i = \norm{X_{\infty}(:,i)}, \quad i = 1,\dots,\rho;$
+    \State \boxed{\sigma = (\sigma_{1},\dots, \sigma_p,0,\dots, 0).}
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{remark}
+  The pivoting in the second QRF is optional, and $P_1 = I$ works well. If
+  the columns of $A$ are nearly orthogonal, the second QR factorization is
+  unnecessary. Such situation is easily detected by inspecting the matrix
+  $R$, see~\cite{drve08ii}.
+\end{remark}
+
+\begin{remark}
+  Determining the numerical rank is tricky. Since if high accuracy is
+  required, then QR factorisation is not authorised to declare rank
+  deficiency. 
+\end{remark}
+
+\subsection{Computing $\Sigma$ and $V$}
+If we need \emph{singular values and the right singular vectors}. Direct
+application of right-handed Jacobi rotation to $A$ or $R$ requires the
+accumulated product of rotation. To avoid this explicit multiplication, we
+consider $R \rightsquigarrow R^T$.
+
+\begin{algorithm}
+  \caption{$(\sigma, V) = \texttt{svd}(A)$}
+  \begin{algorithmic}[1]
+    \State $(P_rA)P = \inner{Q} \begin{pmatrix} R \\ 0 \end{pmatrix}; \quad
+    \rho = \rank(R);$ 
+    \State $X = R(1:\rho,1:n)^T; X_{\infty} = X\inner{V_x}$;
+\State $\sigma_i = \norm{X_{\infty}(:,i)}, \quad i = 1,\dots,\rho; \quad 
+\boxed{\sigma = (\sigma_1,\dots,\sigma_\rho, 0,\dots, 0)};$
+\State $U_x(:,i) = \frac{1}{\sigma_i}X_{\infty}(:,i),\quad i =
+1,\dots,\rho;
+\quad \boxed{V = PU_x}$
+  \end{algorithmic}
+\end{algorithm}
+Notice that, we only have one QR factorization appeared. In some cases,
+such as $\rho \ll n$, the second QR factorization is advisable.
+
+\subsection{Computing $\Sigma$ and $U$} 
+If $\Sigma$ and $U$ are needed, we need to think harder. Clearly, if we
+apply the right handed Jacobi on $X=A$ or $X=R$, then we do not need the
+product of Jacobi rotations. The problem is that \emph{in case $m\gg n$,
+  the rotations on $A$ are too expensive and the convergence may be slow,
+  much slower than in the case $X=R^T$.}
+
+On the other hand, in some cases $X=A$ is the perfect choice. For instance,
+if $H$ is symmetric positive definite, and we have the pivoted Cholesky
+fractorization $P^THP = AA^T$ with lower triangular matrix $A$, then $A^T$
+has the same properties as $R$ from Proposition
+\ref{fwd-sens-diag-scaling}. Thus $AV = U\Sigma$ will be efficient Jacobi
+SVD and since $H=(PU)\Sigma^2(PU)\tp$ is the spectral decomposition of $H$
+and $V$ is not needed.  
+
+To simplify the notation, in Algorithm~\ref{alg:svd-sv-lhsvec}, we define
+for a matrix $M$ its property $\tau(M)$ to be true if $M$ is of full column
+rank and the right-handed Jacobi algorithm applied to $M$ converges
+quickly. Such as the Cholesky factor of positive definite matrix, computed
+with pivoting, then $\tau(A) = \mathrm{true}$. If evaluation of $\tau(A)$
+would require more than $O(mn)$ flops, or if we do not know how to judge
+$A$, then by definition $\tau(A) = \mathrm{false}$.
+
+\begin{algorithm}
+  \caption{$(\sigma,U) = \texttt{svd}(A)$} \label{alg:svd-sv-lhsvec}
+  \begin{algorithmic}[1]
+\If {$\tau(A)$}
+    \State $X = A; X_{\infty} = X\inner{V_x};$
+    \State $\sigma_i = \norm{X_{\infty}(:,i)}, \quad i = 1,\dots,n,\quad 
+    \boxed{\sigma = (\sigma_1,\dots,\sigma_n};$
+\Else
+    \State $(P_rA)P = \inner{Q} \begin{pmatrix} R \\ 0 \end{pmatrix}; \quad
+    \rho = \rank(R);$  
+    \If {$\tau(R)$}
+        \State $X = R; X_{\infty} = X\inner{V_x};$
+        \State $\sigma_i = \norm{X_{\infty}(:,i)}, \quad i = 1,\dots,\rho; 
+\boxed{\sigma = (\sigma_1,\dots,\sigma_p,0,\dots,0)};$ 
+        \State $U_x(:,i) = \frac{1}{\sigma_i}X_{\infty}(:,i),\quad i =
+        1,\dots,\rho; \quad \boxed{U = P_r\tp Q
+        \begin{pmatrix}
+          U_x \\ 0_{(m-\rho) \times \rho}
+        \end{pmatrix}};$
+    \Else 
+        \State $R(1:\rho,1:n)^TP_1 = \inner{Q_1}R_1$;
+        \State $X = R_1^T; X_{\infty} = X\inner{V_x}$;
+        \State $\sigma_i = \norm{X_{\infty}(:,i)}, \quad i = 1,\dots,\rho; 
+\boxed{\sigma = (\sigma_1,\dots,\sigma_p,0,\dots,0)};$ 
+        \State $U_x(:,i) = \frac{1}{\sigma_i}X_{\infty}(:,i),\quad i =
+        1,\dots,\rho; \quad \boxed{U = P_r\tp Q
+        \begin{pmatrix}
+          P_1U_x \\ 0_{(m-\rho) \times \rho}
+        \end{pmatrix}};$
+    \EndIf
+\EndIf
+  \end{algorithmic}
+\end{algorithm}
+ In the case, $X = R\tp$, we need the accumulated product of Jacobi
+ rotations and the cost for only one sweep of rotations is $2n\rho(\rho -
+ 1)$. All of this is avoid by an extra QR factorisation.
+
+\subsection{Computation of $U$, $\Sigma$ and $V$}
+
+Classical implementation of the Jacobi SVD algorithm transforms two
+matrices, one of them approaching the matrix of left singular vectors
+scaled by the corresponding singular values, and the second one is the
+accumulated product of the Jacobi rotations.
+
+Following~\cite{drma99}, we will try not to accumulate Jacobi rotations,and
+the right singular vectors will be computed a posterior from a
+\emph{well-conditioned matrix equation}.
+
+\subsubsection{Classical computation of $V$ by accumulation}
+Let the Jacobi iterations stop at index $\wb k$ and let $\wt X_{\infty} =
+\wt X^{(\wb k)}$. Let $\wt V$ be the computed accumulated product of Jacobi
+rotations used to compute $\wt X_{\infty}$. Row-wise backward stability
+implies 
+\begin{equation}\notag
+  \wt X_{\infty} = (X + \delta X)\wh V
+\end{equation}
+where $\wh V$ is orthogonal, $\norm{\wh V - \wt V} \leq O(n\epsilon)$ and
+$\norm{\delta X(i,:)} \leq \epsilon_J\norm{X(i,:)},\ \epsilon_J\leq
+O(n\varepsilon)$. The matrix $\wt V$ can be written as $\wt V = (I +
+E_0)\wh V$, where $\norm{E_0}$ is small. Therefore, to recover $\wh V$, the
+best we can do is 
+\begin{equation}\notag
+  X\inv \wt X_{\infty} = (I + E_1)\wt V, \quad E_1 = X\inv \delta X.
+\end{equation} 
+Although we do not have $\delta X$, we can let $E_1$ close to zero. To
+estimate $E_1$, we write $X = DY$, where $D$ is diagonal scaling, $D_{ii} =
+\norm{X(i,:)}$, and $Y$ has unit rows in Euclidean norm. We obtain
+\begin{equation}\notag
+  \norm{E_1} = \norm{Y\inv D\inv \delta X} \leq \norm{Y\inv} \norm{D\inv
+    \delta X} \leq \norm{Y\inv}\sqrt{n}\epsilon_J \leq \norm{Y\inv}
+  O(n^{3/2}\varepsilon).
+\end{equation}
+Therefore, as long as the $X$'s row scaled part is well-conditioned, we can
+have 
+\begin{equation}\notag
+  \frac{\norm{X^{-1}\wt X_{\infty} - \wh V}}{\norm{\wh V}} \leq \norm{E}
+\end{equation}
+
+Finally, the matrix $\wt X_{\infty}$ is written as $\wt U \wt \Sigma$. The
+diagonal entries of $\wt \Sigma$ are computed as $\wt \sigma_i =
+computed(\norm{\wt X_{\infty}(:,i)}) = \norm{\wt
+  X_{\infty}(:,i)}(1+\nu_i),\ \abs{\nu_i} \leq O(n \varepsilon),$ and then
+$\wt U(:,i)$ is computed by dividing $\wt X_{\infty}(:,i)$ by $\wt
+\sigma_i$, thus 
+\begin{equation}\notag
+  \wt U \wt \Sigma = \wt X_{\infty} + \delta\wt X_{\infty},\qquad 
+\abs{\delta \wt X_{\infty}} \leq 3 \varepsilon \abs{\wt X_{\infty}}.
+\end{equation}
+
+The following proposition explains how well the computed SVD resembles the
+matrix $X$.
+
+\begin{proposition} \label{prop:svd-residual-err}
+  The matrix $\wt U, \wt \Sigma, \wt V$ and $\wh V$ satisfy the residual
+  relations 
+\begin{equation}\notag
+  \begin{aligned}
+    \wt U \wt \Sigma \wh V^T& = X + F \\
+    \wt U \wt \Sigma \wt V\tp & = (X + F)(I + E_0\tp),
+  \end{aligned}
+\end{equation}
+where for all $i$, 
+\begin{align*}
+  \norm{F(i,:)} & \leq (\varepsilon_J + 3\varepsilon(1 +
+                  \varepsilon_J))\norm{X(i,:)}, \\
+\norm{E_0} & \leq \sqrt{n}\varepsilon_J \leq O(n^{3/2}\varepsilon),\\
+\norm{X\inv F} & \leq \norm{Y\inv} \sqrt{n} (\varepsilon_J + 3\varepsilon(1+\varepsilon_J)).
+\end{align*}
+\end{proposition}
+
+\subsubsection{Computation of $V$ from matrix equation}
+
+Suppose we decide to use an approximation of $\wh V$ instead of $\wt V$.
+The matrix $X\inv \wt X_{\infty}$ is a good candidate, but we cannot have
+the exact value of $X\inv \wt X_{\infty}$. Instead, \emph{we solve the
+  matrix equation $\wt X_{\infty} = X\breve{V}$\footnote{This can be solved
+  using BLAS 3 \texttt{STRSM}.} and take $\breve{V} = computed(X\inv \wt X_{\infty})$}
+
+Since $X$ is triangular, the residual bound for $\breve{V}$ is 
+\begin{equation}\notag
+  E_2 = X\breve{V} - \wt X_{\infty}, \quad \abs{E_2} \leq
+  \epsilon_T\abs{X}\abs{\breve{V}}, \quad \epsilon_T \leq
+  \frac{n\varepsilon}{1- n\varepsilon}. 
+\end{equation}
+
+The following proposition shows that we have also computed a rank revealing
+decomposition of $X$,
+\begin{proposition}
+  The matrix $\wt U, \wt \Sigma, \breve{V}$ satisfy the following residual
+  relations 
+  \begin{equation}\notag
+    \begin{aligned}
+          \wt U \wt \Sigma \breve V\tp & = (X + F)(I + E_3^T), \quad 
+    E_3 = E_1 + X\inv E_2 \wt V^T,\\
+\wt U \wt \Sigma \breve V\inv & 
+= X+ F_1, \quad 
+F_1 = E_2\breve V\inv + \delta \wt X_{\infty} \breve{V}\inv,
+    \end{aligned}
+  \end{equation}
+where $F$ is in Proposition~\ref{prop:svd-residual-err}, $\norm{E_3} \leq
+\norm{Y\inv}(\sqrt{n}\epsilon_J + n\epsilon_T)$, and it holds for all $i$, 
+$\norm{F_1(i,:)} \leq (\varepsilon_T\norm{\ \abs{\breve{V}}\ } + 3\varepsilon_J(1+\varepsilon_J))\norm{\breve{V}\inv}\norm{X(i,:)}$
+\end{proposition}
+
+Analysis shows that the quality of the computed right singular vector
+matrix $\breve V$ depends on the condition number of $Y\inv$, where $X =
+DY$. This means, the rows of the triangular $X$ must be well-conditioned in
+the scaled sense. If $X$ is computed from the initial $A$ using the QR
+factorization with column pivoting, $AP = Q
+\begin{pmatrix}
+  R \\ 0
+\end{pmatrix}
+$, then $X = R$ can be written as $X = DY$ with well-conditioned $Y$. Thus,
+we expect that $\breve{V}$ can be computed accurately.
+
+Conclusion: The initial matrix should be of the form $X = DY = ZC$ where
+$D,C$ are diagonal and both $Y$ and $Z$ well-conditioned. Well-conditioned
+$Z$ implies fast convergence, while well-conditioned $Y$ ensures a stable
+posterior computation of the right singular vectors. Therefore, we define
+$X$ in the following way:
+\begin{equation}\notag
+  AP = Q
+\begin{pmatrix}
+  R \\ 0
+\end{pmatrix}; \quad R\tp P_1 = Q_1R_1; \quad X = R_1^T.
+\end{equation}
+
+
+
+
+\section{Assessing the accuracy of the computed SVD (Skip for now)}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Bibliographies %%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage 
+\bibliographystyle{/Users/clement/bibtex/nj-plain}
+\bibliography{/Users/clement/bibtex/references.bib}
+%% APPENDICES
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

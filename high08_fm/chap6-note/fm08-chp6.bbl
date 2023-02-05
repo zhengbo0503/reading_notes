@@ -1,0 +1,57 @@
+\begin{thebibliography}{1}
+
+\bibitem{chkl01}
+Sheung~Hun Cheng, Nicholas~J. Higham, Charles~S. Kenney, and Alan~J. Laub.
+\newblock \href{http://dx.doi.org/10.1137/S0895479899364015}{Approximating the
+  logarithm of a matrix to specified accuracy}.
+\newblock {\em SIAM Journal on Matrix Analysis and Applications}, 22\penalty0
+  (4):\penalty0 1112–1125, 2001.
+
+\bibitem{debe76}
+Eugene~D. Denman and Alex~N. Beavers.
+\newblock \href{http://dx.doi.org/10.1016/0096-3003(76)90020-5}{The matrix sign
+  function and computations in systems}.
+\newblock {\em Applied Mathematics and Computation}, 2\penalty0 (1):\penalty0
+  63–94, 1976.
+
+\bibitem{golo13_MC}
+Gene~H. {Golub} and Charles~F. {Van Loan}.
+\newblock {\em {Matrix} {Computations}}.
+\newblock Johns {Hopkins} studies in the mathematical sciences. {Fourth}
+  edition, Johns Hopkins University Press, Baltimore, Maryland, 2013.
+\newblock ISBN 978-1-4214-0794-4.
+
+\bibitem{high_ASNA2}
+Nicholas~J. Higham.
+\newblock \href{http://doi.org/10.1137/1.9780898718027}{{\em Accuracy and
+  Stability of Numerical Algorithms}}.
+\newblock Second edition, Society for Industrial and Applied Mathematics,
+  Philadelphia, PA, USA, jan 2002.
+\newblock xxx+680 pp.
+\newblock ISBN 0-89871-521-0.
+
+\bibitem{high08_FM}
+Nicholas~J. Higham.
+\newblock \href{http://doi.org/10.1137/1.9780898717778}{{\em Functions of
+  Matrices: {Theory} and Computation}}.
+\newblock Society for Industrial and Applied Mathematics, Philadelphia, PA,
+  USA, 2008.
+\newblock xx+425 pp.
+\newblock ISBN 978-0-898716-46-7.
+
+\bibitem{mein04}
+Beatrice Meini.
+\newblock \href{http://dx.doi.org/10.1137/S0895479803426656}{The matrix square
+  root from a new functional perspective: {Theoretical} results and
+  computational issues}.
+\newblock {\em SIAM Journal on Matrix Analysis and Applications}, 26\penalty0
+  (2):\penalty0 362–376, 2004.
+
+\bibitem{anva80}
+J.~L. van Hemmen and T.~Ando.
+\newblock \href{http://dx.doi.org/10.1007/BF01212822}{An inequality for trace
+  ideals}.
+\newblock {\em Communications in Mathematical Physics}, 76\penalty0
+  (2):\penalty0 143–148, 1980.
+
+\end{thebibliography}

@@ -1,0 +1,41 @@
+\begin{thebibliography}{1}
+
+\bibitem{debe76}
+Eugene~D. Denman and Alex~N. Beavers.
+\newblock \href{http://dx.doi.org/10.1016/0096-3003(76)90020-5}{The matrix sign
+  function and computations in systems}.
+\newblock {\em Applied Mathematics and Computation}, 2\penalty0 (1):\penalty0
+  63–94, 1976.
+
+\bibitem{high86nwmsqrt}
+Nicholas~J. Higham.
+\newblock
+  \href{http://dx.doi.org/10.1090/S0025-5718-1986-0829624-5}{{Newton’s}
+  method for the matrix square root}.
+\newblock {\em Mathematics of Computation}, 46\penalty0 (174):\penalty0
+  537–549, 1986.
+
+\bibitem{high97}
+Nicholas~J. Higham.
+\newblock \href{http://dx.doi.org/10.1023/A:1019150005407}{Stable iterations
+  for the matrix square root}.
+\newblock {\em Numerical Algorithms}, 15\penalty0 (2):\penalty0 227–242,
+  1997.
+
+\bibitem{high08_fm}
+Nicholas~J. Higham.
+\newblock \href{http://doi.org/10.1137/1.9780898717778}{{\em Functions of
+  Matrices: {Theory} and Computation}}.
+\newblock Society for Industrial and Applied Mathematics, Philadelphia, PA,
+  USA, 2008.
+\newblock xx+425 pp.
+\newblock ISBN 978-0-898716-46-7.
+
+\bibitem{schu33}
+G{\"{u}}nther Schulz.
+\newblock \href{https://doi.org/10.1002/zamm.19330130111}{{Iterative Berechung}
+  der reziproken {Matrix}}.
+\newblock {\em {ZAMM} - Zeitschrift f{\"{u}}r Angewandte Mathematik und
+  Mechanik}, 13\penalty0 (1):\penalty0 57--59, 1933.
+
+\end{thebibliography}

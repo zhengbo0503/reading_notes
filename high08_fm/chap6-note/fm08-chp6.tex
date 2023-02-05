@@ -1,0 +1,845 @@
+\documentclass{article}
+\def\ntitle {Note : \texttt{high08\_FM} Chapter 6}
+% \def\nauthor{ } % default author is Zhengbo Zhou
+% \def\notes{ } % default is the submitted version
+% \def\ndate{ } % default is today's date
+\def\needcrop{ } % crop for easy previewing
+\def\fancysec{ } % section font become fancier 
+\input{/Users/clement/Dropbox/bibtex/clem.tex}
+
+\newcommand{\textus}[1]{\textup{\textsf{#1}}}
+\renewcommand{\comment}[1]{\textus{\color{violet}\ $\heartsuit$(#1)}}
+\newcommand{\sign}{\mathrm{sign}}
+
+
+\begin{document}
+\maketitle
+\tableofcontents
+\thispagestyle{firstpage} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% MAIN ARTICLE %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+  This is a note for \cite{high08_FM}, and this file by no mean serve as a
+  correct reference for knowledge. This is only for myself convenience. 
+\end{abstract}
+
+\section{Introduction}\label{sec:introduction}
+In this chapter, we will always consider the principal square root, denoted
+as $A^{1/2}$. Recall that if $A\in\C\nn$ with no eigenvalues on $\R^-$,
+$A^{1/2}$ is the unique square root $X$ of $A$ whose spectrum lies in the
+open right half-plane. We will denote $\sqrt{A}$ be any arbitrary, possibly
+non-principal square roots. The matrix (principal) square root also
+has an integral expression:
+\begin{equation}\label{eq:sqrt-integral}
+  A^{1/2} = \frac{2}{\pi}A\int_0^{\infty}(t^2I + A)^{-1}~\dd t.
+\end{equation}
+
+The layout of this chapter will be 
+\begin{enumerate}
+\item Sensitivity and conditioning: Analysis of the conditioning of the
+  matrix square root, and the sensitivity of the relative residual.
+\item Schur method: A Schur method and a version working entirely in real
+  arithmetic are described.
+\item Stability and limiting accuracy: Newton’s method and several variants
+  follow, with a stability analysis revealing that the variants do not
+  suffer the instability that vitiates the Newton iteration. 
+\item Scaling the Newton iteration.
+\item Numerical Experiments.
+\item Iteration via matrix sign function: A class of coupled iterations
+  obtained via iterations for the matrix sign function are derived and
+  their stability proved. 
+\item Special matrices: Linearly convergent iterations for matrices that
+  are “almost diagonal”, as well as for M-matrices, are analyzed, and a
+  preferred iteration for Hermitian posi- tive definite matrices is given. 
+\item Computing small-normed square roots: The issue of choosing from among
+  the many square roots of a given matrix is addressed by considering how
+  to compute a small-normed square root. 
+\item Comparison of methods.
+\item Involutory matrices.
+\end{enumerate}
+
+
+\section{Sensitivity and Conditioning}
+\subsection{Condition number}
+\begin{theorem} [Theorem~3.5 in \cite{high08_FM}]
+  \label{thm:fre-deri-of-inv}
+  Let $f$ and $f\inv$ both exist and be continuous in an open neighbourhood
+  of $X$ and $f(X)$. Assume $L_f$ exists at the neighbourhood and
+  nonsingular at $X$. Then, $L_{f\inv}$ exists at $f(X)$, and
+  \begin{equation}\notag
+    L_f\left(X,L_{f\inv}(f(X),E)\right) = E.
+  \end{equation}
+\end{theorem}
+
+\begin{example}
+  Suppose $f(X) = X^2$, recall that $L_{x^2}(X,E) = XE + EX$. Obviously,
+  $f^{-1}(X) = \sqrt{X}$, and let $A = f(X) = X^2$. Then, by
+  \ref{thm:fre-deri-of-inv}, we have
+  \begin{equation}\notag
+    L_{x^2}(X,L_{x^{1/2}}(A,E)) = E,\quad\implies \quad 
+    L_{x^{1/2}}(A,E) X + X L_{x^{1/2}}(A,E) = E.
+  \end{equation}
+  Formally, suppose $g(A) = \sqrt{A}$, then we have $L_g(A,E)$ defined by
+  the following matrix equation \comment{Sylvester equation?}
+  \begin{equation}\notag
+    L_g(A,E)A^{1/2} + A^{1/2}L_g(A,E) = E.
+  \end{equation}
+\end{example}
+
+Using $\mathrm{vec}(AXB) = (B\tp \otimes A)\mathrm{vec}(X)$, and define
+$L_g(A,E) \equiv L$, we have
+\begin{equation}\notag
+  (X\tp \otimes I + I \otimes X) \mathrm{vec}(L) = \mathrm{vec}(E),
+\end{equation}
+and then we can deduce that
+\begin{equation}\notag
+  \fnorm{L} = \tnorm{(X\tp \otimes I + I \otimes X)\inv}.
+\end{equation} 
+Hence, we have the Frobenius norm (relative) condition number of the matrix
+square root at $A$ is
+\begin{equation}\notag
+  \kappa_{\mathrm{sqrt}}(X) = \frac{\tnorm{(X\tp \otimes I + I \otimes
+      X)\inv} \fnorm{A}}{\fnorm{X}}.
+\end{equation}
+If follows that
+\begin{equation}\label{eq:kappa-sqrt}
+  \kappa_{\mathrm{sqrt}}(X) \geq \frac{1}{\min_{i,j = 1:n}\abs{\mu_i + \mu_j}}\frac{\fnorm{A}}{\fnorm{X}}
+\end{equation}
+where $\mu_j$ are the eigenvalues of $X = \sqrt{A}$.
+
+This inequality reveals the situation that the $\kappa_{\mathrm{sqrt}}$
+must be large:
+\begin{enumerate}
+\item When $A$ (hence $X$) has an eigenvalue of small modulus.
+\item When the square root is the principal square root and a real $A$ has
+  a pair of complex conjugate eigenvalues close to the negative real axis.
+  Suppose $\lambda = r\eu^{\im(\pi - \epsilon)}\ (0<\epsilon\ll 1)$ and
+  $\wb \lambda = r\eu^{\im(\epsilon - \pi)}$. Then
+  \begin{equation}\label{eq:6.3}
+    |\lambda^{1/2} + \wb\lambda^{1/2}| =
+    r^{1/2}|\eu^{\im(\pi-\epsilon)/2} - \eu^{-\im(\pi-\epsilon)/2}| =
+    r^{1/2}O(\epsilon). 
+  \end{equation}
+\end{enumerate}
+
+If $A$ is normal, then $X$ is normal, by using the fact that a matrix is
+normal if and only if it has a spectral decomposition. Then, we have the
+equality in \eqref{eq:6.3}.
+
+The formula for $\kappa_{\mathrm{sqrt}}$ allows us to identify the best
+conditioned square root of a Hermitian positive definite matrix. Define
+$\kappa(A) = \norm{A}\norm{A\inv}$.
+
+\begin{lemma}
+  If $A\in\C\nn$ is Hermitian positive definite, and $X$ is any primary
+  square root of $A$, then
+  \begin{equation}\notag
+    \kappa_{\mathrm{sqrt}}(A^{1/2}) =
+    \frac{\tnorm{A\inv}^{1/2}}{2}\frac{\fnorm{A}}{\fnorm{A^{1/2}}} \leq
+    \kappa_{\mathrm{sqrt}}(X). 
+  \end{equation}
+  Moreover,
+  \begin{equation}\notag
+    \frac{1}{2n^{3/2}}\kappa_F(A^{1/2}) \leq
+    \kappa_{\mathrm{sqrt}}(A^{1/2}) \leq \frac{1}{2}\kappa_F(A^{1/2}). 
+  \end{equation}
+\end{lemma}
+
+\begin{proof}
+  Since $A$ is positive definite matrix, therefore we can assume that the
+  eigenvalues of $A$ satisfies:
+  $0 < \lambda_n \le \lambda_{n-1} \le \cdots \le \lambda_2 \le \lambda_1$.
+  Also, since $A$ is positive definite, hence it is normal, and
+  correspondingly $X$ is normal as well. Therefore we can use the
+  equality~(\ref{eq:kappa-sqrt}),
+  \begin{equation}\notag
+    \kappa_{\mathrm{sqrt}} =
+    \frac{1}{2\sqrt{\lambda_n}}\frac{\fnorm{A}}{\fnorm{X}} =
+    \frac{\tnorm{A\inv}^{1/2}}{2} \frac{\fnorm{A}}{\fnorm{A^{1/2}}}.
+  \end{equation}
+  Any other primary square root $X$ has eigenvalues $\mu_j$ with moduli
+  $\sqrt{\lambda_j}$, so the upper bound of $\kappa_{\mathrm{sqrt}}(X)$
+  follows from
+  \begin{equation}\notag
+    \min_{i,j = 1:n}\abs{\mu_i + \mu_j} \le \min_{i,j = 1:n}\abs{\mu_i} +
+    \abs{\mu_j} \le 2 \sqrt{\lambda_n}
+  \end{equation}
+  together with the fact that $\fnorm{X}^2 = \sum_{i=1}^n\lambda_i$ is the
+  same for all primary square roots of $A$. The upper bound and the lower
+  bound of $\kappa_{\mathrm{sqrt}}(A^{1/2})$ are comes from standard norm
+  inequalities. \ycite[2002, Chap.~6]{high_ASNA2}.
+\end{proof}
+
+The next results shows an elegant bound for the difference between the
+principal square roots of two matrices.
+
+\begin{theorem}
+  If $A,B\in\C\nn$ are Hermitian positive definite, then for any unitarily
+  invariant norm
+  \begin{equation}\notag
+    \norm{A^{1/2} + B^{1/2}} \leq \frac{1}{\lambda_{\min}(A)^{1/2} +
+      \lambda_{\min}(B)^{1/2}} \norm{A - B},
+  \end{equation}
+  where $\lambda_{\min}$ denotes the smallest eigenvalue.
+\end{theorem}
+
+\begin{proof}
+  This is a special case of \ycite[1980, Prop.~3.2]{anva80}.
+\end{proof}
+
+\subsection{Perturbation}
+Suppose $\wt X = X + E$ be an approximation to a square root $X$ of
+$A\in\C\nn$, where $\norm{E} \le \epsilon\norm{X}$. Then $\wt X^2 = A + XE
++ EX + E^2$, and this leads to the relative residual bound:
+\begin{equation}\notag
+  \frac{\norm{A - \wt X^2}}{\norm{A}} \leq (2\epsilon +
+  \epsilon^2)\alpha(X), 
+\end{equation}
+where
+\begin{equation}\label{eq:rel-residual-err-bound}
+  \alpha(X) = \frac{\norm{X}^2}{\norm{A}} = \frac{\norm{X}^2}{\norm{X^2}}
+  \ge 1. 
+\end{equation}
+The quantity $\alpha(X)$ can be regarded as a condition number for the
+relative residual of $X$. If it is large, then \emph{a small perturbation
+  of $X$ (such as $fl(X)$, which is the rounded square root) can have a
+  relative residual much larger than the size of the relative perturbation.} 
+Therefore the conclusion is that, we cannot expect a numerical method to do
+better than provide a computed square root $\wh X$ with relative residual
+of order $\alpha(\wh X) u$, where $u$ is the unit roundoff.
+
+It is easy to show that 
+\begin{equation}\notag
+  \frac{\kappa(X)}{\kappa(A)} \leq \alpha(X) \leq \kappa(X).
+\end{equation}
+\begin{proof}
+  Notice that $\norm{X\inv} = \norm{X\inv X\inv X} \le
+  \norm{A\inv}\norm{X}$. Hence, we have 
+\begin{equation}\notag
+  \frac{\norm{X\inv}}{\norm{A\inv}} \le \norm{X} \quad \implies 
+\quad \frac{\norm{X}\norm{X\inv}}{\norm{A}\norm{A\inv}} \le
+\frac{\norm{X}^2}{\norm{A}},
+\end{equation}
+this is equivalent as $\kappa(X)/\kappa(A)\le \alpha(X)$.
+
+The right-hand side can be viewed by the following inequality:
+\begin{equation}\notag
+  \alpha(X) = \frac{\norm{X}^2\norm{X\inv}}{\norm{A}\norm{X\inv}} =
+  \frac{\kappa(X)\norm{X}}{\norm{A}\norm{X\inv}} \le
+  \frac{\kappa(X)\norm{X}}{\norm{X}} = \kappa(X),
+\end{equation}
+where the inequality comes from $\norm{X} = \norm{AX\inv} \le
+\norm{A}\norm{X\inv}$. Thus a large value of $\alpha(X)$ implies that $X$
+is ill-conditioned, and if $A$ is well-conditioned, then $\alpha(X) \approx
+\kappa(X)$. If $X$ is normal, then $\alpha(X) = 1$ in 2-norm.
+\end{proof}
+
+
+\section{Schur Method}
+\begin{theorem} [Schur decomposition]
+  Let $A \in \C^{n \times n}$. Then there exists a unitary matrix $U$ and
+  an upper triangular matrix $T$ such that $U^* A U=T$, that is,
+  $A=U T U^*$.
+\end{theorem}
+
+\begin{theorem}
+  [real Schur decomposition]
+  Let $A \in \mathbb{R}^{n \times n}$. Then there exists an orthogonal
+  matrix $U$ and an upper quasi-triangular matrix $T$ such that
+  $U^T A U=T$. Here,
+  \begin{equation*}
+    T=\left[
+      \begin{array}{cccc}
+        T_{11} & T_{12} & \cdots & T_{1 m} \\
+        0 & T_{22} & \cdots & T_{2 m} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        0 & 0 & \cdots & T_{m m}
+      \end{array}\right],
+  \end{equation*}
+  where each $T_{i i}$ is either $1 \times 1$ or $2 \times 2$ complex
+  conjugate eigenvalues.
+\end{theorem}
+
+
+\subsection{General Schur Decomposition}
+Let $A\in\C\nn$ be nonsingular, and let $f(A)$ denotes any primary square
+root of $A$. Given a Schur decomposition $A = QTQ\ctp$, where $Q$ is
+unitary and $T$ is upper triangular, and $f(A) = Qf(T)Q\ctp$. Hence,
+computing the square root of $A$ reduces to computing the square roots
+$U = f(T)$ of upper triangular $T$. The $(i,i)$ and $(i,j)(j > i)$ elements
+of the equation $U^2 = T$ can be written as
+\begin{equation}\label{eq:schur-method}
+  \begin{aligned}
+    u_{ii}^2 & = t_{ii}, \\
+    (u_{ii} + u_{jj})u_{ij} & = t_{ij} - \sum_{k = i + 1}^{j-1}u_{ik}u_{kj}.
+  \end{aligned}
+\end{equation}
+We can compute the diagonal of $U$ and then solve for the $u_{ij}$ either a
+superdiagonal at a time or a column at a time. We have the
+algorithm~\ref{alg:schur-method}.
+
+\begin{algorithm}
+  \caption{(Schur Method). Given a nonsingular $A\in\C\nn$, this algorithm
+    computes $X = \sqrt{A}$ via a Schur decomposition, where $\sqrt{\cdot}$
+    denotes any primary square root.}
+  \label{alg:schur-method}
+  \begin{algorithmic}[1]
+    \State Compute a (complex) Schur decomposition $A = QTQ\ctp$. \State
+    $u_{ii} = \sqrt{t_{ii}},\ i = 1:n$ \For {$j = 2:n$} \For
+    {$i = j-1:-1:1$} \State
+    $\displaystyle u_{ij} = \frac{t_{ij} -
+      \sum_{k=i+1}^{j-1}u_{ik}u_{kj}}{u_{ii} + u_{jj}}$ \EndFor \EndFor
+    \State $X = QUQ\ctp$
+  \end{algorithmic}
+\end{algorithm}
+
+The \emph{cost}: $25n^3$ flops for the Schur decomposition plus $n^3/3$ for
+$U$ and $3n^3$ to form $X$, which gives $28 \frac{1}{3}n^3$ flops in total.
+
+Algorithm~\ref{alg:schur-method} generates all the primary square roots of
+$A$ as different choices of sign in
+$u_{ii} = \sqrt{t_{ii}} = \pm t_{ii}^{1/2}$ are used.
+
+\subsection{Real Schur Decomposition}
+If $A$ is real but has some nonreal eigenvalues, then
+Algorithm~\ref{alg:schur-method} uses complex arithmetic. This is
+\emph{undesirable}, because (i) complex arithmetic is more expensive than
+real arithmetic, and (ii) rounding errors may cause a computed result to be
+produced with nonzero imaginary part. We can use the real Schur
+decomposition instead to avoid complex arithmetic.
+
+Let $A \in \R\nn$ have the real Schur decomposition $A = QRQ\tp$, where $Q$
+is orthogonal and $R$ is upper quasi-triangular with $1\times 1$ and
+$2\times 2$ diagonal blocks. Then $f(A) = Qf(R)Q\tp$, where $U = f(R)$ is
+upper quasi-triangular with the same block structure as $R$. The equation
+$U^2 = R$ can be written as in an analogous way as (\ref{eq:schur-method}):
+\begin{align}
+  U_{ii}^2 &= R_{ii} \notag \\ 
+  U_{ii}U_{ij} + U_{ij}U_{jj} & = R_{ij} -
+                                \sum_{k=i+1}^{j-1}U_{ik}U_{kj}. \label{eq:schur-slyvester} 
+\end{align}
+Once the diagonal blocks $U_{ii}$ are computed, we can use
+\eqref{eq:schur-slyvester} to compute the remaining blocks $U_{ij}$ a block
+superdiagonal or a block column at a time. The condition for the Sylvester
+equation~(\ref{eq:schur-slyvester}) to have a unique solution $U_{ij}$ is
+that \emph{$U_{ii}$ and $-U_{jj}$ have no eigenvalue in common, and this is
+  guaranteed for any primary square root when $A$ is
+  nonsingular.\comment{why?}} When neither $U_{ii}$ nor $U_{jj}$ is a
+scalar, (\ref{eq:schur-slyvester}) can solved by writing in the form
+\begin{equation}\notag
+  (I \otimes U_{ii} + U_{jj}\tp \otimes I) \mathrm{vec}(U_{ij}) =
+  \mathrm{vec}(R_{ij} - \sum_{k=i+1}^{j-1}U_{ik}U_{kj}),
+\end{equation}
+which is a linear system $Ax = b$ of order 4 that can be solved by Gaussian
+elimination with partial pivoting.
+
+We now consider the computation of $\sqrt{R_{ii}}$ for $2\times 2$ blocks
+$R_{ii}$, which is necessarily have distinct complex conjugate eigenvalues.
+(refer to the properties of the
+\href{https://nhigham.com/2022/05/11/what-is-a-schur-decomposition/}{Schur
+  decomposition}).
+
+\begin{lemma}\label{lemma:2by2-primary-sqrt}
+  Let $A\in\R^{2\times 2}$ have distinct complex conjugate eigenvalues.
+  Then $A$ has four square roots, and all of them are primary functions of
+  $A$. Two of them are real, with complex conjugate eigenvalues; two are
+  pure imaginary, with eigenvalues that are not complex conjugates.
+\end{lemma}
+
+\begin{proof}
+  Since $A$ has distinct eigenvalues $\theta \pm \im \mu$, then $A$ has
+  four square roots, all of them are functions of $A$~\ycite[2008,
+  Thm~1.26]{high08_FM}. Remain to construct them. Consider the following
+  matrix construction:
+  \begin{equation}\notag
+    Z\inv A Z = \diag(\lambda, \wb \lambda) = \theta I + \im \mu K, \quad 
+    K =
+    \begin{bmatrix}
+      1 & 0 \\ 0 & -1 
+    \end{bmatrix}.
+  \end{equation}
+  Then $A = \theta I + \mu W$, where $W = \im Z K Z\inv$, and since
+  $\theta, \mu \in \R$, it follows that $W \in \R^{2\times 2}$. Suppose
+  $(\alpha + \im \beta)^2 = \theta + \im \mu$, then all four square roots
+  of $A$ are given by $X = ZDZ\inv$, where
+  $D = \pm \diag(\alpha + \im \beta, \pm (\alpha - \im\beta))$. Using
+  previous notation, we can categorise the diagonal matrix $D$ into two
+  distinct cases:
+  \begin{equation}\notag
+    D_1 = \pm (\alpha I + \im \beta K),\qquad 
+    D_{2} = \pm \im (\beta I - \im \alpha K).
+  \end{equation}
+  Thus, we can reconstruct the matrix square root $X$ in the following two
+  ways: Real matrix with complex conjugate eigenvalues
+  $\lambda(X_1) = \pm(\alpha + \im \beta, \alpha - \im \beta)$.
+  \begin{equation}\notag
+    X_1 = ZD_1Z\inv = \pm (\alpha I + \beta \im ZKZ\inv) = \pm(\alpha I +
+    \beta W) \in \R^{2\times 2}.  
+  \end{equation}
+  Pure imaginary matrix with non complex conjugate eigenvalues
+  $\lambda(X_2) = \pm(\alpha + \im \beta , -\alpha + \im \beta)$.
+  \begin{equation}\notag
+    X_2 = ZD_2Z\inv = \pm \im (\beta I - \alpha \im ZKZ\inv) = \pm \im
+    (\beta I - \alpha W).
+  \end{equation}
+\end{proof}
+
+The proof gives a way to construct $R_{ii}^{1/2}$, writting
+\begin{equation}\notag
+  R_{ii} = 
+  \begin{bmatrix}
+    r_{11} & r_{12} \\ r_{21} & r_{22}
+  \end{bmatrix}
+\end{equation}
+the eigenvalues of $R_{ii}$ are $\theta \pm \im \mu$, where
+\begin{equation}\notag
+  \theta = \frac{1}{2}(r_{11} + r_{22}),\qquad \mu = \frac{1}{2}\left(
+    -(r_{11} - r_{22})^2 - 4r_{21}r_{12} \right)^{1/2}.
+\end{equation}
+The former equation is constructed using $\tr(A) = \sum_i \lambda_i(A)$.
+The latter equation is constructed using
+$(\theta + \im \mu)(\theta - \im\mu) = \theta^2 + \mu^2$.
+
+We now require $\alpha$ and $\beta$ such that
+$(\alpha + \im\beta)^2 = \theta + \im\mu$. A stable way to compute them is
+as follows:
+
+\begin{algorithm}
+  \caption{This algorithm computes the square root $\alpha + \im\beta$ of
+    $\theta + \im\mu$ with $\alpha \geq 0$.}
+  \begin{algorithmic}[1]
+    \State If $\theta = 0$ and $\mu = 0$, then $\alpha = \beta = 0$, quit,
+    end. \State
+    $\displaystyle t = \left( \frac{\abs{\theta} + (\theta^2 +
+        \mu^2)^{1/2}}{2} \right)^{1/2}$ \State if $\theta \ge 0$ \State
+    \quad $\alpha = t, \beta = \mu/(2\alpha)$ \State else \State \quad
+    $\beta = t, \alpha = \mu/(2\beta)$ \State end
+  \end{algorithmic}
+\end{algorithm}
+
+Finally, the real square roots of $R_{ii}$ are obtained from
+\begin{align}
+  U_{ii} & = \pm (\alpha I + \frac{1}{2\alpha}(R_{ii} - \theta I)) \notag \\ 
+         & = \pm 
+           \begin{bmatrix}
+             \alpha + \frac{1}{4\alpha}(r_{11} - r_{22}) & \frac{1}{2\alpha}r_{12}
+             \\
+             \frac{1}{2\alpha} r_{21} & \alpha - \frac{1}{4\alpha}(r_{11} - r_{22})
+           \end{bmatrix}. \label{eq:6.9}
+\end{align}
+
+Before present the algorithm, let us discuss the number of real square
+roots for arbitrary $A\in\R\nn$.
+
+\begin{theorem}
+  Let $A\in\R\nn$ be nonsingular. If $A$ has a real negative eigenvalue,
+  then $A$ has no real square root that is primary function of $A$.
+
+  If $A$ has no real negative eigenvalues, then there are precisely
+  $2^{r+c}$ \emph{real} primary square roots of $A$, where $r$ is then
+  number of distinct real eigenvalues and $c$ is the number of distinct
+  complex conjugate eigenvalue pairs.
+\end{theorem}
+
+\begin{proof}
+  Let $A$ has a real Schur decomposition. Since $f(A) = Qf(R)Q\tp$, $f(A)$
+  is real if and only if $f(R)$ is real. If $A$ has a real negative
+  eigenvalue, $R_i = (r_{ii})$ say, then $f(R_i)$ is necessarily nonreal,
+  and this gives the first part of the proof. 
+
+  If $A$ has no real negative eigenvalues, consider the $2^s$ primary
+  square roots  of $A$ described in Theorem~1.26. We have $s = r + 2c$,
+  i.e. $A$ has $2^r$ real primary square roots from real, distinct
+  eigenvalues; also, a half of $2^{2c}$ primary square roots from complex
+  conjugate eigenvalues are \emph{real} according to
+  Lemma~\ref{lemma:2by2-primary-sqrt}, hence precisely $2^{r + c}$ of its
+  primary square roots are real. 
+\end{proof}
+
+\begin{algorithm}
+  \caption{(real Schur method). Given $A \in \R\nn$ with no eigenvalues on
+    $\R^{-}$, this algorithm computes $X = \sqrt{A}$ via a Schur
+    decomposition, where $\sqrt{\cdot}$ denotes any real primary square
+    root.}
+  \label{alg:real-schur-method}
+  \begin{algorithmic}
+    \State Compute a real Schur decomposition, $A = QRQ\tp$, where $R$ is
+    block $m\times m$.
+    \State Compute $U_{ii} = \sqrt{R_{ii}}$, $i = 1:m$, using
+    (\ref{eq:6.9}) whenever $R_{ii}$ is $2\times 2$.
+    \For {$j = 1:m$}
+        \For{$i = j -1 : -1 : 1$}
+            \State Solve $U_{ii}U_{ij} + U_{ij}U_{jj} = R_{ij} - \sum_{k =
+              i + 1}^{j - 1}U_{ik}U_{kj}$ for $U_{ij}$.
+        \EndFor
+    \EndFor
+    \State{$X = QUQ\tp.$}
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{remark}
+  \ 
+  
+  \begin{enumerate}
+  \item The principal square root is computed if the principal square root
+    is taken at line 2, which for $2\times 2$ blocks means taking the
+    positive sign in (\ref{eq:6.9}).
+  \item Second, as for \ref{alg:schur-method}, it is necessary that
+    whenever $R_{ii}$ and $R_{jj}$ have the same eigenvalues, we take the
+    same square root. 
+  \end{enumerate}
+\end{remark}
+
+\subsection{Numerical stability}
+Now we consider the numerical stability of Algorithm~\ref{alg:schur-method}
+and \ref{alg:real-schur-method}. A straightforward rounding error analysis
+shows that the computed square root $\wh U$  of $T$ in
+Algorithm~\ref{alg:schur-method} satisfies 
+\begin{equation}\notag
+  \wh U^2 = T + \varDelta T, \quad \abs{\varDelta T} \leq \wt \gamma_n
+  \abs{\wh U}^2 
+\end{equation}
+where the inequality is to be interpreted elementwise.  Computation of the
+Schur decomposition by QR algorithm is a backward stable
+process~\ycite[2013, Sec.~7.5.6]{golo13_MC} and standard error analysis
+leads to the overall result
+\begin{equation}\notag
+  \wh X^2 = A + \varDelta A,\quad \fnorm{\varDelta A} \leq \wt
+  \gamma_{n^3}\fnorm{\wh X}^2
+\end{equation}
+which can be expressed as 
+\begin{equation}\label{eq:6.10}
+  \frac{\fnorm{A - \wh X^2}}{\fnorm{A}} \leq \wt \gamma_{n^3}\alpha_F(\wh X)
+\end{equation}
+where $\alpha$ is defined in (\ref{eq:rel-residual-err-bound}). The same
+conclusion holds for Algorithm~\ref{alg:real-schur-method}, which can be
+shown to satisfy the same error bound~(\ref{eq:6.10}).
+
+\section{Newton's Method and Its Variants}
+
+\subsection{Newton and Commutativity}
+
+Newton method for solving $X^2 = A$ can be derived as follows. Let $Y$ be
+an approximate solution, and set $Y + E = X$, where $E$ is to be
+determined. Then $A = (Y + E)^2 = Y^2 + EY + YE + E^2$. Dropping the second
+order term in $E$ leads to the Newton's method:
+\begin{equation}
+  \label{eq:newton-method-sqrt}
+  \left.
+  \begin{aligned}
+     X_0 \text{ given} & \\
+     \text{Solve } X_kE_k + E_kX_k & = A - X_k^2 \\
+     X_{k+1} & = X_{k} + E_k     
+  \end{aligned} \right\} \quad k = 0,1,2,\dots,
+\end{equation}
+
+At each iteration, a Sylvester equation mush be solved for $E_k$. The
+standard way of solving the Sylvester equation is via Schur decomposition
+of the coefficient matrices, which in this case are both $X_k$. But the
+Schur method of the previous section can compute a square root with just
+one Schur decomposition, so Newton's method is unduly expensive in the form
+\eqref{eq:newton-method-sqrt}. 
+
+The following lemma enable us to reduce the cost. Note that the $E_k$ in
+\eqref{eq:newton-method-sqrt} is well defined, that is, the Sylvester
+equation is nonsingular, if and only if $X_k$ and $-X_{k}$ have no
+eigenvalues in common. 
+
+\begin{lemma}
+  Suppose that in the Newton iteration \eqref{eq:newton-method-sqrt}, $X_0$
+  commutes with $A$ and all the iterates are well-defined. Then for all
+  $k$, $X_k$ commutes with $A$ and $X_{k+1} = \frac{1}{2}(X_k + X_k\inv A)$.
+\end{lemma}
+
+\begin{proof}
+  We prove this by induction. Firstly, we notice that if $X_k$ and $A$ are
+  commute, then  there is a trivial solution for the Sylvester equation
+  $X_kE_k + E_k X_k = A - X_k^2$, which is $E_k = \frac{1}{2}(X_k\inv A -
+  X_k)$ and this solution is clearly commute with $A$. Hence, we will stick
+  to this solution and start for induction.
+
+  \noindent\emph{Induction Statement.} For $k = 1,2,\dots,$ $X_k$ commute
+  with $A$ and $X_{k + 1} = \frac{1}{2}(X_k + X_k\inv A)$.
+
+  \noindent\emph{Base case.} For $k = 1$, we have $X_1 = X_0 + E_0$, where
+  $E_0 = \frac{1}{2}(X_0^{-1} A - X_0)$, and  
+  \begin{equation}\notag
+    X_1 = X_0 + \frac{1}{2}(X_0^{-1} A - X_0) = \frac{1}{2}(X_0\inv A + X_0).
+  \end{equation}
+  Here, $X_1$ is commute with $A$, and $E_0$ is commute with $A$. 
+
+  \noindent\emph{Inductive step.} Suppose the statement is true for $k =
+  n-1$, i.e. $X_{n-1}$ commute with $A$ and $X_n = \frac{1}{2}( X_{n-1}
+  \inv A + X_{n-1})$ which is also commute with $A$ by $AX_{n -1} =
+  X_{n-1}A$.  By solution of the  Sylvester equation, we have $E_n =
+  \frac{1}{2}(X_n\inv A - X_n)$, and this is clearly commute with $A$ by
+  the commutativity between $X_n$ and $A$. Moreover, $X_{n + 1} =
+  \frac{1}{2}(X_n\inv A + X_{n})$ which is also commute with $A$ by $A$ and
+  $X_n$ are commute. The proof is then complete.
+\end{proof}
+
+This lemma shows that if $X_0$ is chosen to commute with $A$, then all the
+$X_k$ and $E_{k}$ in \eqref{eq:newton-method-sqrt} commute with $A$,
+permitting a good simplification of the iteration. The most common choice
+of $X_0$ is $A$, giving the Newton iteration 
+\begin{mybox}{}
+  \begin{center}
+    \textsf{Newton iteration (matrix square root)}
+  \end{center}
+  \begin{equation}\label{eq:6.12}
+    X_{k + 1} = \frac{1}{2}(X_k + X_k\inv A), \qquad X_0 = A.
+  \end{equation}
+\end{mybox}
+
+\subsection{Link to the Matrix Sign Function}
+
+If $A$ is nonsingular, standard convergence theory for Newton's method
+allows us to deduce quadratic convergence of \eqref{eq:newton-method-sqrt}
+to a primary square root for $X_0$ sufficiently close to square root, since
+the Fr\'{e}chet derivative of $F(X) = X^2 - A$ is nonsingular at a primary
+square root. The next result shows the unconditional quadratic convergence
+of \eqref{eq:6.12} to the \emph{principal} square root. Moreover, it shows
+that \eqref{eq:6.12} is equivalent to the Newton sign iteration
+\eqref{eq:nt-sign-iter} 
+
+\begin{mybox}{}
+  \begin{center}
+    \textsf{Newton iteration (matrix sign function)}
+  \end{center}
+  \begin{equation}
+    \label{eq:nt-sign-iter}\tag{Sign}
+    X_{k + 1} = \frac{1}{2}(X_k + X_k\inv), \quad X_0 = A.
+  \end{equation}
+\end{mybox}
+
+\begin{theorem}[Convergence of Newton square root iteration]
+  \label{thm:6.9}
+  Let $A\in\C\nn$ has no eigenvalues on $\R^-$. The Newton square root
+  iterates $X_k$ from \eqref{eq:6.12} with any $X_0$ that commutes with $A$
+  are related to the Newton sign iterates 
+  \begin{equation}\notag
+    S_{k + 1} = \frac{1}{2} (S_k + S_k\inv),\quad S_0 = A^{-1/2}X_0,
+  \end{equation}
+  by $X_k \equiv A^{1/2}S_k$. Hence provided that $A^{-1/2}X_0$ has no pure
+  imaginary eigenvalues, the $X_k$ are defined and $X_k$ converges
+  quadratically to $A^{1/2}\sign(A^{-1/2} X_0)$.
+
+  In particular, if the spectrum of $A^{-1/2}X_0$ lies in the right
+  half-plane then $X_k$ converges quadratically to $A^{1/2}$ and, for any
+  consistent norm, 
+  \begin{equation}\label{eq:6.13}
+    \norm{X_{k+1} - A^{1/2}} \leq \frac{1}{2} \norm{X_k\inv} \norm{X_k -
+      A^{1/2}}^2 
+  \end{equation}
+\end{theorem}
+
+\begin{proof}
+  We first note that any matrix that commutes with $A$ commutes with
+  $A^{\pm 1/2}$ since it's a polynomial of $A$. We have $X_0 = A^{1/2}S_0$,
+  hence $S_0$ commute with $A$.
+
+  Assume that $X_k = A^{1/2}S_k$, and $S_k$ commute with $A$, then $S_k$
+  commute with $A^{1/2}$, and
+  \begin{equation}
+    \notag
+    X_{k + 1} = \frac{1}{2}(A^{1/2}S_k + S_k\inv A^{-1/2}A) = A^{1/2} \cdot
+    \frac{1}{2}(S_k + S_k \inv) = A^{1/2}S_{k+1},
+  \end{equation}
+  and $S_{k + 1}$ clearly commute with $A$. Hence $X_k \equiv A^{1/2}S_k$
+  by induction. Then using \ycite[2008, Theorem~5.6]{high08_FM},
+  \begin{equation}
+    \notag
+    \lim_{k \to \infty}X_k = A^{1/2}\lim_{k \to \infty}S_k =
+    A^{1/2}\sign(S_0) = A^{1/2}\sign(A^{-1/2}X_{0}), 
+  \end{equation}
+  and the quadratic convergence of $X_k$ follows from that of $S_k$.
+
+  For the last part, if $S_0 = A^{-1/2}X_0$ has spectrum in the right
+  half-plane then $\sign(S_0) = I$ and hence $X_k \to A$. Using the
+  commutativity of the iterates with $A$, it is easy to show that 
+  \begin{equation}\label{eq:6.14}
+    X_{k + 1} \pm A^{1/2} = \frac{1}{2}X_k\inv (X_k \pm A^{1/2})^2
+  \end{equation}
+  which, with minus sign, gives \eqref{eq:6.13}.
+\end{proof}
+
+
+\begin{remark} \  
+  \begin{enumerate}
+  \item An implication of Theorem~\ref{thm:6.9} of theoretical interest,
+    which can also be deduced from the connection with the full Newton
+    method, is that \eqref{eq:6.12} converges to $A^{1/2}$ for any $X_0$
+    that commutes with $A$ and is sufficiently close to $A^{1/2}$.
+  \item 
+  It is worth noting that the sequence $X_k$ from \eqref{eq:6.12} may be
+  well-defined when that for the full Newton method
+  \eqref{eq:newton-method-sqrt} is not. No analogue of the condition in
+  \ref{thm:6.9} guaranteeing that the $X_k$ is well-defined is available
+  for \eqref{eq:newton-method-sqrt}. 
+  \item 
+  This analysis using the Newton sign iteration is more powerful than the
+  analysis using the Jordan canonical form in
+  \cite[Section~4.9.3]{high08_FM}. If $X_0$ is only known to commute with
+  $A$, then $X_k$ do not necessarily share the same Jordan block as $A$, so
+  the analysis cannot break down to one single Jordan form.
+\item 
+  Note that, from \cite[Section~5.3]{high08_FM}, the Newton iteration for
+  $\sign(A)$ requires more iterations if $A$ has eigenvalues close to the
+  imaginary axis. Theorem~\ref{thm:6.9} therefore implies that the Newton
+  iteration \eqref{eq:6.12} requires more iterations if $A$ has eigenvalues
+  close to the negative real axis. 
+\item 
+  When $A$ is positive definite, the convergence of \eqref{eq:6.12} is
+  monotonic from above in the positive semidefinite ordering.
+\item 
+  It's interesting to consider how \eqref{eq:6.12} behaves when $X_0$ does
+  not commute with $A$, although commutativity is assumed in the
+  derivation. Lack of commutativity can cause quadratic convergence, and
+  even convergence itself, to be lost. 
+  \end{enumerate}
+\end{remark}
+
+
+\subsection{Other Variants of Newton Iteration}
+A coupled version of \eqref{eq:6.12} can be obtained by defining
+$Y_k = A\inv X_k$. Then $X_{k + 1} = \frac{1}{2}(X_k + Y_k\inv)$ and
+$Y_{k+1} = A\inv X_{k+1} = \frac{1}{2}(Y_k + Y_k\inv)$ on using the fact
+that $X_k$ commute with $A$. This is the iteration of Denman and
+Beavers~\cite{debe76}
+\begin{mybox}{}
+  \begin{center}
+    \textsf{DB iteration}
+  \end{center}
+  \begin{equation}
+    \label{eq:6.15}
+    \begin{aligned}
+      X_{k + 1} & = \frac{1}{2}(X_k + Y_k\inv), \quad X_0 = A, \\
+      Y_{k + 1} & = \frac{1}{2}(Y_k + X_k\inv), \quad Y_0 = I.
+    \end{aligned}
+  \end{equation}
+\end{mybox}
+Under the condition of \ref{thm:6.9}
+\begin{equation}\label{eq:6.16}
+  \lim_{k \to \infty} X_k = A^{1/2}, \qquad \lim_{k\to \infty}Y_k =
+  A^{-1/2}. 
+\end{equation}
+
+Defining $M_k = X_kY_k$, we have
+\begin{equation}\notag
+  M_{k+1} = \frac{1}{2}(X_kY_k\inv)\frac{1}{2}(Y_k + X_k\inv) =
+  \frac{1}{4}(2I + M_k + M_k\inv),
+\end{equation}
+gives the product form of the DB iteration, identified by Cheng, Higham,
+Kenney and Laub~\cite{chkl01} in which we iterates with $M_k$ and either
+$X_k$ or $Y_k$:
+\begin{mybox}{}
+  \begin{center}
+    \textsf{Product form DB iteration}
+  \end{center}
+  \begin{equation}
+    \label{eq:6.17}
+    \begin{aligned}
+      M_{k + 1} &= \frac{1}{2}\left(I + \frac{M_k + M_k\inv}{2}\right),
+                  \quad M_0 = A,\\ 
+      X_{k + 1} &= \frac{1}{2}X_k(I + M_k\inv), \quad X_0 = A, \\ 
+      Y_{k + 1} &= \frac{1}{2}Y_k(I + M_k\inv), \quad Y_0 = I.
+    \end{aligned}
+  \end{equation}
+\end{mybox}
+
+Clearly, $\lim_{k\to \infty} M_k = I$. The product form DB iteration has
+the advantage in efficiency over DB iteration that it has trade one of the
+matrix inversions for a matrix multiplication.
+
+Another attraction of \eqref{eq:6.17} is that, a convergence test can be
+based on the error $\norm{M_k-I}$, which is available free of charge.
+
+Yet another variant of \eqref{eq:6.12} can be derived by noting that
+\begin{equation}\notag
+  \begin{aligned}
+    E_{k + 1} & = \frac{1}{2}(X_{k + 1}\inv A - X_{k + 1}) \\ 
+              & = \frac{1}{2} (X_{k + 1}\inv)(A- X_{k + 1}^2) \\
+              & = \frac{1}{2} (X_{k + 1}\inv)\left(A - \frac{1}{4}(X_k + X_k\inv
+                A)\right) \\
+              & = \frac{1}{2} X_{k + 1}\inv \left( \frac{2A - X_k^2 - X_k^{-2}A^2}{4}
+                \right) \\ 
+              & = -\frac{1}{2} X_{k + 1}\inv \frac{(X_k - X_k\inv
+                A)^2}{4}\\ 
+              & = -\frac{1}{2}X_{k + 1}\inv E_k^2 = -\frac{1}{2}E_kX_{k +
+                1}\inv E_k. 
+  \end{aligned}
+\end{equation}
+
+Setting $Y = 2E_k$ and $Z_k = 4X_{k + 1}$, we obtain the iteration
+\begin{mybox}{}
+  \begin{center}
+    \textsf{CR iteration}
+  \end{center}
+  \begin{equation}
+    \label{eq:6.19}
+    \begin{aligned}
+      Y_{k + 1}& = - Y_k Z_k\inv Y_k,\quad Y_0 = I - A,\\ 
+      Z_{k + 1}& = Z_k + 2Y_{k + 1},\quad Z_0 = 2(I + A)
+    \end{aligned}
+  \end{equation}
+\end{mybox}
+
+From the derivation, we have $Y_k \to 0$ and $Z \to 4A^{1/2}$. This
+iteration is derived in a different way by Meini~\cite{mein04}.
+
+A minor variation of \eqref{eq:6.19} is: set $X_k = Z_k/4$ and
+$E_k = Y_{k + 1} /2$, then \eqref{eq:6.19} becomes
+
+\begin{mybox}{}
+  \begin{center}
+    \textsf{IN iteration}
+  \end{center}
+  \begin{equation}
+    \label{eq:6.20}
+    \begin{aligned}
+      X_{k +1 }& = X_k + E_k,\quad X_0 = A, \\
+      E_{k + 1} & = -\frac{1}{2}E_k X_{k + 1}\inv E_k, \quad E_0 = \frac{1}{2}(I - A).
+    \end{aligned}
+  \end{equation}
+\end{mybox}
+
+Here $X_{k} \to A^{1/2}$ and $E_k \to 0$. This incremental form of the
+Newton iteration, suggested by Iannazzo, is of interest because it update
+$X_k$ by a correction that is small and accurately computable. 
+
+The computational cost of the Newton iteration and its variants is compared
+in Table~\ref{tab:6.1}.
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{r|cc}
+    \toprule 
+    Iteration & Operations & Flops \\ \midrule
+    Newton, \eqref{eq:6.12} & $D$ & $8n^3/3$ \\
+    DB, \eqref{eq:6.15} & $2I$ & $4n^3$ \\
+    Product DB, \eqref{eq:6.17} & $M + I$ & $4n^3$ \\
+    CR, \eqref{eq:6.19} & $M + D$ & $14n^3/3$ \\
+    IN, \eqref{eq:6.20} & $M + D$ & $14n^3/3$\\ \bottomrule
+  \end{tabular}
+  \caption{Cost per iteration of matrix square root iterations}
+  \label{tab:6.1}
+\end{table}
+
+Here $M$ denotes a matrix multiplication, $I$ denotes a matrix inversion,
+and $D$ denotes a solution of a multiple right-hand side linear system.
+Clearly, the Newton iteration~\eqref{eq:6.12} is the least expensive
+iteration. 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Bibliographies %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+\bibliographystyle{/Users/clement/Dropbox/bibtex/nj-plain}
+\bibliography{/Users/clement/Dropbox/bibtex/ref.bib}
+%% APPENDICES
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

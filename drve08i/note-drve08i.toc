@@ -1,0 +1,18 @@
+\contentsline {section}{\numberline {1}Introduction}{2}{section.2}%
+\contentsline {subsection}{\numberline {1.1}History}{2}{subsection.6}%
+\contentsline {subsection}{\numberline {1.2}A Bit Word on the Jacobi}{2}{subsection.7}%
+\contentsline {subsection}{\numberline {1.3}Convergence}{3}{subsection.10}%
+\contentsline {section}{\numberline {2}Accuracy and Backward Stability in SVD Computation}{4}{section.11}%
+\contentsline {subsection}{\numberline {2.1}Basic floating point error analysis}{5}{subsection.19}%
+\contentsline {subsection}{\numberline {2.2}Condition Number and Scaling}{6}{subsection.26}%
+\contentsline {section}{\numberline {3}Preconditioned Jacobi SVD algorithm}{6}{section.31}%
+\contentsline {subsection}{\numberline {3.1}The QR factorisation as preprocessor}{7}{subsection.32}%
+\contentsline {section}{\numberline {4}Simple Question: $A$ or $A^{T}$?}{8}{section.44}%
+\contentsline {section}{\numberline {5}The Algorithms}{9}{section.45}%
+\contentsline {subsection}{\numberline {5.1}Computing only $\Sigma $}{9}{subsection.47}%
+\contentsline {subsection}{\numberline {5.2}Computing $\Sigma $ and $V$}{9}{subsection.51}%
+\contentsline {subsection}{\numberline {5.3}Computing $\Sigma $ and $U$}{10}{subsection.53}%
+\contentsline {subsection}{\numberline {5.4}Computation of $U$, $\Sigma $ and $V$}{10}{subsection.55}%
+\contentsline {subsubsection}{\numberline {5.4.1}Classical computation of $V$ by accumulation}{10}{subsubsection.56}%
+\contentsline {subsubsection}{\numberline {5.4.2}Computation of $V$ from matrix equation}{12}{subsubsection.64}%
+\contentsline {section}{\numberline {6}Assessing the accuracy of the computed SVD (Skip for now)}{12}{section.70}%

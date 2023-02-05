@@ -1,0 +1,130 @@
+\begin{thebibliography}{10}
+
+\bibitem{bugo65}
+Peter Businger and Gene~H. Golub.
+\newblock \href{http://dx.doi.org/10.1007/BF01436084}{Linear least squares
+  solutions by householder transformations}.
+\newblock {\em Numerische Mathematik}, 7\penalty0 (3):\penalty0 269–276,
+  1965.
+
+\bibitem{deri89}
+P.~P.~M. de~Rijk.
+\newblock \href{http://dx.doi.org/10.1137/0910023}{A one-sided {Jacobi}
+  algorithm for computing the singular value decomposition on a vector
+  computer}.
+\newblock {\em SIAM Journal on Scientific and Statistical Computing},
+  10\penalty0 (2):\penalty0 359–371, 1989.
+
+\bibitem{deve92}
+{James} {Demmel} and {Kre\v{s}imi}r {Veseli}\'{c}.
+\newblock \href{https://doi.org/10.1137/0613074}{{Jacobi}'s method is {more}
+  {accurate} than {QR}}.
+\newblock {\em {SIAM} {Journal} on {Matrix} {Analysis} and {Applications}},
+  13\penalty0 (4):\penalty0 1204--1245, 1992.
+
+\bibitem{drma94_PHD}
+Zlatko Drma{\v{c}}.
+\newblock {\em Computing the Singular and the Generalized Singular Values}.
+\newblock Phd thesis, Lehrgebiet Mathematische Physik, Fernuniversit{\"{a}}t
+  Hagen, September 1994.
+
+\bibitem{drma97}
+Zlatko Drma{\v{c}}.
+\newblock \href{http://dx.doi.org/10.1137/S1064827594265095}{Implementation of
+  jacobi rotations for accurate singular value computation in floating point
+  arithmetic}.
+\newblock {\em SIAM Journal on Scientific Computing}, 18\penalty0 (4):\penalty0
+  1200–1222, 1997.
+
+\bibitem{drve08i}
+Zlatko Drma{\v{c}} and Kre{\v{s}}imir Veseli{\'{c}}.
+\newblock \href{https://doi.org/10.1137/050639193}{New fast and accurate
+  {Jacobi} {SVD} algorithm. {I}}.
+\newblock {\em {SIAM} Journal on Matrix Analysis and Applications}, 29\penalty0
+  (4):\penalty0 1322--1342, 2008.
+
+\bibitem{drve08ii}
+Zlatko Drma{\v{c}} and Kre{\v{s}}imir Veseli{\'{c}}.
+\newblock \href{https://doi.org/10.1137/05063920x}{New fast and accurate
+  {Jacobi} {SVD} algorithm. {II}}.
+\newblock {\em {SIAM} Journal on Matrix Analysis and Applications}, 29\penalty0
+  (4):\penalty0 1343--1362, 2008.
+
+\bibitem{drma99}
+Z~Drma\v{c}.
+\newblock \href{http://dx.doi.org/10.1093/imanum/19.2.191}{A posteriori
+  computation of the singular vectors in a preconditioned jacobi svd
+  algorithm}.
+\newblock {\em IMA Journal of Numerical Analysis}, 19\penalty0 (2):\penalty0
+  191–213, 1999.
+
+\bibitem{fohe60}
+G.~E. Forsythe and P.~Henrici.
+\newblock \href{https://www.jstor.org/stable/1993275}{The cyclic {Jacobi}
+  method for computing the principal values of a complex matrix}.
+\newblock {\em Transactions of the American Mathematical Society}, 94\penalty0
+  (1):\penalty0 1--23, 1960.
+\newblock Publisher: American Mathematical Society.
+
+\bibitem{gmv59}
+H.~H. Goldstine, F.~J. Murray, and J.~von Neumann.
+\newblock \href{http://dx.doi.org/10.1145/320954.320960}{The {Jacobi} method
+  for real symmetric matrices}.
+\newblock {\em Journal of the ACM}, 6\penalty0 (1):\penalty0 59–96, 1959.
+
+\bibitem{greg53}
+Robert~T. Gregory.
+\newblock \href{https://doi.org/10.1090/s0025-5718-1953-0057643-6}{{Computing}
+  eigenvalues and eigenvectors of a symmetric matrix on the {ILLIAC}}.
+\newblock {\em {Mathematics} of {Computation}}, 7\penalty0 (44):\penalty0
+  215--220, 1953.
+
+\bibitem{hari91}
+Vjeran Hari.
+\newblock \href{https://doi.org/10.1007/BF01385728}{{On} sharp quadratic
+  convergence bounds for the serial {Jacobi} methods}.
+\newblock {\em {Numerische} {Mathematik}}, 60\penalty0 (1):\penalty0 375--406,
+  1991.
+
+\bibitem{masc95}
+Walter~F. Mascarenhas.
+\newblock \href{http://dx.doi.org/10.1137/S0895479890179631}{On the convergence
+  of the {Jacobi} method for arbitrary orderings}.
+\newblock {\em SIAM Journal on Matrix Analysis and Applications}, 16\penalty0
+  (4):\penalty0 1197–1209, 1995.
+
+\bibitem{rhha93}
+Noah~H. Rhee and Vjeran Hari.
+\newblock \href{http://dx.doi.org/10.1007/BF01385689}{On the global and cubic
+  convergence of a quasi-cyclic jacobi method}.
+\newblock {\em Numerische Mathematik}, 66\penalty0 (1):\penalty0 97–122,
+  1993.
+
+\bibitem{ruti66}
+H.~Rutishauser.
+\newblock \href{http://dx.doi.org/10.1007/BF02165223}{The {Jacobi} method for
+  real symmetric matrices}.
+\newblock {\em Numerische Mathematik}, 9\penalty0 (1):\penalty0 1–10, 1966.
+
+\bibitem{scho61}
+A~Sch{\"o}nhage.
+\newblock \href{https://doi.org/10.1007/bf01386036}{Zur konvergenz des
+  {Jacobi}-verfahrens}.
+\newblock {\em {Numerische} {Mathematik}}, 3\penalty0 (1):\penalty0 374--380,
+  1961.
+
+\bibitem{veha89}
+K.~Veseli{\'c} and V.~Hari.
+\newblock \href{http://dx.doi.org/10.1007/BF01396349}{A note on a one-sided
+  {Jacobi} algorithm}.
+\newblock {\em Numerische Mathematik}, 56\penalty0 (6):\penalty0 627–633,
+  1989.
+
+\bibitem{wilk62}
+J.~H. {Wilkinson}.
+\newblock \href{https://doi.org/10.1007/bf01386321}{Note on the quadratic
+  convergence of the cyclic {Jacobi} process}.
+\newblock {\em {Numerische} {Mathematik}}, 4\penalty0 (1):\penalty0 296--300,
+  1962.
+
+\end{thebibliography}

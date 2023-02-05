@@ -1,0 +1,184 @@
+\documentclass{article}
+\def\ntitle {Reading : high97}
+% \def\nauthor{ } % default author is Zhengbo Zhou
+% \def\notes{ } % default is the submitted version
+% \def\ndate{ } % default is today's date
+\def\needcrop{ } % crop for easy previewing
+\def\fancysec{ } % section font become fancier 
+\input{/Users/clement/Dropbox/bibtex/clem.tex}
+
+%% redefine \emph and \bf such that they are colored and can be easily
+%% transformed back to normal \emph and \bf
+\renewcommand{\emph}[1]{\textit{\color{purple} #1}}
+\renewcommand{\bf}[1]{\textsf{\bfseries \color{purple} #1}}
+
+\def\sign{\mathrm{sign}}
+
+\begin{document}
+\maketitle
+% \tableofcontents
+\thispagestyle{firstpage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% MAIN ARTICLE %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\begin{abstract}
+  Newton's method has been used for computing the matrix square root.
+  However, this method is unstable. The paper rederive the stable DB
+  iteration and derive the coupled Newton--Schulz iteration for matrix
+  square root. Scaling method is briefly discussed in context of the new
+  derivation. A new way for computing the square root of the positive
+  definite matrix is given.
+\end{abstract}
+
+
+
+The Newton iteration for $A^{1/2}$ is
+\begin{equation}\notag
+  X_{k + 1} = \frac{1}{2}(X_k + X_k\inv A), \quad X_0 = A. \qquad 
+  \lim_{k \to \infty} X_k \to A^{1/2}.
+\end{equation}
+Although this method is converged quadratically, poor numerical stability
+makes it useless for practical use. The instability is explained by
+\cite{high86nwmsqrt}. DB iteration~\cite{debe76} is derived by using
+$Y_k = X_k$ and $Z_k = A\inv X_k$, and $Y_k \to A^{1/2}$ and
+$Z_k \to A^{-1/2}$.
+
+This paper rederived DB iteration and combined this with the Schulz
+iteration~\cite{schu33} to get a new iteration by using a simple
+identity:
+
+\begin{mybox}
+  \begin{center}
+    \sffamily Main result, \cite[Lemma~1]{high97}
+  \end{center}
+  \begin{equation}\notag
+    \mathrm{sign}\left(
+      \begin{bmatrix} 
+        0 & A \\ I & 0
+      \end{bmatrix}\right) = 
+    \begin{bmatrix}
+      0 & A^{1/2} \\ A^{-1/2} & 0 
+    \end{bmatrix}
+  \end{equation}
+\end{mybox}
+
+Then based on the standard Newton iteration for computing
+$\mathrm{sign}(B)$:
+\begin{equation}\label{eq:mtx-sign}
+  X_{k+1} = \frac{1}{2} (X_k + X_k^{-1}), \qquad X_0 = B, 
+  \qquad   
+  B = 
+  \begin{bmatrix}
+    0 & A \\ I & 0 
+  \end{bmatrix}.
+\end{equation}
+This rederived the DB iteration: Define and notice
+\begin{equation}\notag
+  X_k =
+  \begin{bmatrix}
+    0 & Y_{k} \\ Z_k & 0 
+  \end{bmatrix} \implies 
+  X_k\inv = 
+  \begin{bmatrix}
+    0 & Z_k \inv \\ Y_k\inv & 0
+  \end{bmatrix}.
+\end{equation}
+Plug this into the \eqref{eq:mtx-sign}, we have
+\begin{equation}\notag
+  X_{k + 1} =
+  \begin{bmatrix}
+    0 & Y_{k + 1} \\ Z_{k+1} & 0
+  \end{bmatrix} = 
+  \frac{1}{2} \left( 
+    \begin{bmatrix}
+      0 & Y_k + Z_k\inv \\ Z_k + Y_k\inv & 0
+    \end{bmatrix}
+  \right) \stackrel{k\to\infty}{\implies}
+  \begin{bmatrix}
+    0 & A^{1/2} \\ A^{-1/2} & 0
+  \end{bmatrix}
+\end{equation}
+which is precisely the DB iteration.
+
+Using the Schulz iteration
+\begin{equation}\notag
+  X_{n + 1} = X_n(2I - AX_n)
+\end{equation}
+which computes the $A\inv$ where $X_0$ is any approximation of $A\inv$. By
+the Newton--Schulz iteration for the matrix sign function,
+\begin{equation}\notag
+  X_{k+1} = \frac{1}{2}X_k(3I - X_k^2), \quad X_0 = B,
+\end{equation}
+and Corollary 1.34 from \cite{high08_fm}, the paper derived the coupled
+Newton--Schulz iteration for matrix square root
+\begin{equation}\notag
+  Y_{k + 1} = \frac{1}{2}Y_k(3I - Z_{k}Y_k), 
+  \qquad Z_{k+1} = \frac{1}{2} (3I - Z_kY_k)Z_k.
+\end{equation}
+
+\begin{quote}
+  Although the method is at least quadratic rates of convergence. Rapid
+  convergence is not guaranteed in practice because the error can take may
+  iterations to become small enough for quadratic convergence to be
+  observed.
+\end{quote}
+This can be accelerated by Newton iteration with scaling. In this paper, it
+provides the determinantal scaling $\gamma_k = \abs{\det(X_k)^{-1/n}}$.
+This can be easily formed during the formation of $X_k\inv$ by using LU
+decomposition. A scaled version DB iteration is also provided by using
+\eqref{eq:mtx-sign}.
+
+An algorithm for computing the matrix square root is provided
+\cite[Algorithm~2]{high97} for a Hermitian positive definite matrix $A$:
+First computing the Cholesky factorisation $A = RR\ctp$, then compute the
+polar decomposition of $R = UH$ \cite[Chapter~8]{high08_fm}. The Hermitian
+positive definite factor of this decomposition is the principal square root
+of $A$.
+
+Finally, the paper also provide a ``condition number'' of the matrix square
+root, $\alpha(X)$ which arises in the situation that the matrix $A$ is not
+symmetric.
+
+Consider the relative residual:
+\begin{equation}\notag
+  \mathrm{res}(X_k) = \frac{\tnorm{A-X_k^2}}{\tnorm{A}}.
+\end{equation}
+We shouldn't expect the $\mathrm{res}$ to reach the roundoff error since if
+we perturb $X$ by $E$ where $\tnorm{E} \le \epsilon \tnorm{X}$, then
+\begin{equation}\notag
+  \mathrm{res}(X + E) =  \frac{\tnorm{-XE-EX-E^2}}{\tnorm{A}} \le 
+  \frac{(2\epsilon + \epsilon^2)\tnorm{X}^2}{\tnorm{A}}.
+\end{equation}
+For symmetric matrix, $\mathrm{res} \le 2\epsilon + O(\epsilon^2)$. For
+nonsymmetric matrices $\alpha(X) = \tnorm{X}^2/\tnorm{A}$ can be
+arbitrarily large.
+
+
+
+ 
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Bibliographies %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+\bibliographystyle{/Users/clement/Dropbox/bibtex/nj-plain}
+\bibliography{/Users/clement/Dropbox/bibtex/ref.bib}
+%% APPENDICES
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

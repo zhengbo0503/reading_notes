@@ -1,0 +1,48 @@
+This is BibTeX, Version 0.99d
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: fm08-chp6.aux
+Reallocating 'name_of_file' (item size: 1) to 39 items.
+The style file: /Users/clement/Dropbox/bibtex/nj-plain.bst
+Reallocating 'name_of_file' (item size: 1) to 38 items.
+Database file #1: /Users/clement/Dropbox/bibtex/ref.bib
+You've used 7 entries,
+            2359 wiz_defined-function locations,
+            611 strings with 5905 characters,
+and the built_in function-call counts, 2280 in all, are:
+= -- 219
+> -- 83
+< -- 0
++ -- 36
+- -- 26
+* -- 182
+:= -- 382
+add.period$ -- 27
+call.type$ -- 7
+change.case$ -- 33
+chr.to.int$ -- 0
+cite$ -- 7
+duplicate$ -- 86
+empty$ -- 206
+format.name$ -- 26
+if$ -- 478
+int.to.chr$ -- 0
+int.to.str$ -- 7
+missing$ -- 10
+newline$ -- 43
+num.names$ -- 14
+pop$ -- 32
+preamble$ -- 1
+purify$ -- 27
+quote$ -- 0
+skip$ -- 49
+stack$ -- 0
+substring$ -- 146
+swap$ -- 13
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 22
+warning$ -- 0
+while$ -- 18
+width$ -- 8
+write$ -- 92

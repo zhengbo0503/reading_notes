@@ -1,0 +1,374 @@
+\documentclass{article}
+
+\def\ntitle {Reading Notes \cite{ZB2022AMPJMftSEP}}
+% \def\nauthor{ } % default author is Zhengbo Zhou
+% \def\notes{ } % default is the submitted version
+% \def\ndate{ } % default is today's date
+\input{clem.tex}
+\DeclareMathOperator{\off}{off}
+\newcommand{\Egap}[1]{\min_{\lambda_i({#1}) \neq \lambda_j({#1})} \abs{\lambda_i({#1}) - \lambda_j({#1})}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newtcbtheorem[number within=section]%
+{claim} % \begin..
+{Claim} % Title
+{
+    colback=white,
+    colframe=black,
+    boxrule=0.75pt,
+    breakable,
+    arc=0pt,
+    outer arc=0pt,
+} % Style - default
+{claim} % label prefix; cite as ``theo:yourlabel''
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+\maketitle
+% \tableofcontents
+\thispagestyle{firstpage} 
+
+\begin{abstract}
+    % 1. What did the authors try to accomplish?
+    The authors try to implement a Jacobi algorithm which utilizes the
+    benefit of fastness of low precision. It first computes the
+    approximate eigendecomposition in low precision, then orthogonalize
+    it using MGS approach and apply to original matrix as a
+    preconditioner, and finally compute the eigensystem of
+    preconditioned matrix. 
+    
+    The paper also provides the bound on distance
+    of low precision eigenmatrix and its orthogonal QR factor, a bound
+    on $\mathrm{off}(\text{Preconditioned Matrix})$, and a sufficient
+    condition for the Jacobi algorithm to have quadratic convergence
+    that related to $\operatorname{Egap}(A)$ and
+    $\operatorname{Egap}(Q\tp AQ)$. 
+    % 2. What were the key elements of the approach
+    The key element is the preconditioning method. Notice that the
+    quadratic convergence is reaily presented by~\cite{Kempen1966}, and
+    by preconditioning, the preconditioned matrix is automatically
+    satisfies the condition presented in \cite{Kempen1966}.
+    % 3. What can you use yourself?
+    We can study the way of constructing $\norm{Z-Q}$ and way of
+    constructing error bounds.
+    % 4. What other references do you want to follow?
+
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% MAIN ARTICLE %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Summary and Outline of Paper}
+\begin{lemma}
+    \label{lemma.1.1}
+    Lemma 2.1 Let $A \in \mathbb{R}^{m \times n}$ with
+    $\operatorname{rank}(A)=n$. Suppose the $M G S$ method computes the
+    approximate $Q R$ factorization $A \approx \widehat{Q} \widehat{R}$ in
+    precision $v$, where $\widehat{R} \in \mathbb{R}^{n \times n}$ is upper
+    triangular and $\widehat{Q} \in \mathbb{R}^{m \times n}$. Then there
+    exist constants $\eta_i \equiv \eta_i(m, n)$ for $i=1,2,3$ such that 
+    $$
+    \|A-\widehat{Q} \widehat{R}\| \leq \eta_1\|A\| v, \quad\|\widehat{Q}^T \widehat{Q}-I_n\| \leq \eta_2 \kappa(A) v, 
+    $$
+    and $\widehat{Q}+\delta \widehat{Q}$ is orthogonal with $\|\delta \widehat{Q}\|
+    \leq \eta_3 \kappa(A) v$, where $\kappa(A)=\sigma_1(A) /
+    \sigma_{\min }(A)$ is the condition number of $A$. 
+\end{lemma}
+
+\begin{lemma}\label{lemma.2-2}
+    Lemma 2.2 Let $A \in \mathbb{R}^{n \times n}$ be a real symmetric
+    matrix. The computed symmetric eigenvalue decomposition (SED) $A
+    \approx \widehat{P} \widehat{\Lambda} \widehat{P}^T$ with $\widehat{P} \in
+    \mathbb{R}^{n \times n}$ and
+    $\widehat{\Lambda}=\operatorname{diag}\left(\widehat{\lambda}_1, \ldots,
+    \widehat{\lambda}_n\right) \in \mathbb{R}^{n \times n}$ via any
+    eigensolver in LAPACK or EISPACK in precision $v$ is nearly the
+    exact symmetric Schur decomposition of $A+E$, i.e.,
+    $$
+        A+E=(\widehat{P}+\delta \widehat{P}) 
+        \widehat{\Lambda}(\widehat{P}+\delta \widehat{P})^T,
+    $$
+    where $\|E\| \leq p(n)\|A\| v$ and $\widehat{P}+\delta \widehat{P}$ is
+    orthogonal with $\|\delta \widehat{P}\| \leq p(n) v$. Here, $p(n)$ is a
+    modestly growing function of $n$. 
+\end{lemma}
+
+\begin{lemma}
+    Lemma 2.3 Let $A \in \mathbb{R}^{m \times n}$ be a real matrix $(m
+    \geq n)$. The computed $S V D A \approx \widehat{U} \widehat{\Sigma}
+    \widehat{V}^T$ with $\widehat{U} \in \mathbb{R}^{m \times m}, \widehat{V} \in
+    \mathbb{R}^{n \times n}$, and
+    $\widehat{\Sigma}=\operatorname{diag}\left(\widehat{\sigma}_1, \ldots,
+    \widehat{\sigma}_n\right) \in \mathbb{R}^{m \times n}$ via any SVD
+    solver in LAPACK, LINPACK or EISPACK in precision $v$ is nearly the
+    exact SVD of $A+E$, i.e., 
+    $$
+        A+E=(\widehat{U}+\delta \widehat{U}) \widehat{\Sigma}(\widehat{V}+\delta \widehat{V})^T
+    $$
+    where $\|E\| \leq p(m, n)\|A\| v$ and $\widehat{U}+\delta \widehat{U}$ and
+    $\widehat{V}+\delta \widehat{V}$ are both orthogonal with $\|\delta
+    \widehat{U}\| \leq p(m, n) v$ and $\|\delta \widehat{V}\| \leq p(m, n) v$.
+    Here, $p(m, n)$ is a modestly growing function of $m$ and $n$. 
+\end{lemma}
+
+\begin{lemma}
+    Lemma 2.4 If $A$ and $A+E$ are $n \times n$ real symmetric matrices,
+    then 
+    $$
+     \left|\lambda_k(A+E)-\lambda_k(A)\right| \leq\|E\|,
+    $$
+    for $k=1, \ldots, n$.
+\end{lemma}
+
+\begin{lemma}
+    \label{lemma.3-3}
+    Lemma 3.3 Let $A^{(k)}$ be the matrix $A$ after $k$ Jacobi updates in Algorithm $3.2$ with $A^{(0)}=A$. Suppose
+    $$
+    \min _{\lambda_i\left(A^{(0)}\right) \neq \lambda_j\left(A^{(0)}\right)}\left|\lambda_i\left(A^{(0)}\right)-\lambda_j\left(A^{(0)}\right)\right| \geq d>0 .
+    $$
+    Moreover, if we reach a point that $\|\operatorname{off}\left(A^{(k)}\right)\|_F<d /(4 \sqrt{2})$, then we have
+    $$
+    \|\operatorname{off}\left(A^{(k+N)}\right)\|_F \leq \frac{\sqrt{34 / 9}}{d}\|\operatorname{off}\left(A^{(k)}\right)\|_F^2
+    $$
+    where $N=n(n-1) / 2$
+\end{lemma}
+
+\section{Outline of Proofs}
+
+\begin{lemma}
+    \label{lemma.4-1}
+    Suppose that $Z \in \mathbb{R}^{n \times n}$ in Step 1 of Algorithm
+    $4.1$ is computed by any eigensolver in LAPACK or EISPACK in
+    precision $v$ and $Q \in \mathbb{R}^{n \times n}$ in Step 2 of
+    Algorithm $4.1$ is computed by using the MGS method to $Z$ in
+    precision $\omega(\omega \ll v)$. Then there exist constants $h_i
+    \equiv h_i(n)$ for $i=1,2$ such that
+    $$
+        \|Z-Q\|_F \leq h_1 v+h_2 \omega
+    $$
+\end{lemma}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{proof}
+    [Outline of proof]
+    \ 
+
+    \begin{itemize}
+        \item Rewrite $\|Z - Q\|_F = \|QR+F_1-Q\| \leq
+        \|Q\|\|R-I\|_F+\|F_1\|$.
+        \item Construct bounds of $\|Q\|$ and $\|F_1\|$ by given theorems.
+        \item Rewrite $\|R-I\|_F = \sqrt{\sum_{i=1}^n (r_{ii}-1)^2 + \sum_{i
+        < j}r_{ij}^2}$.
+        \item Construct bounds for $r_{ii}$ and $r_{jj}$.
+        \item Notice $1/\|R\inv\| \leq \abs{r_{ii}} \leq \|R\|$, hence we
+        need to construct bounds on $\|R\|$ and $\|R\inv\|$.
+        \item Moreover, notice ${\abs{r_{ij}} \leq \|R\inv-R\tp\|} \leq
+        \|I-R\tp R\|\|R\inv\|$. Hence we need to construct bounds on
+        $\|I-R\tp R\|$ by using the orthogonality of $Z + \delta Z$. 
+        {\color{blue} \sffamily Why? The first inequality}
+        \item Finally assembly these together, we have $\|Z-Q\| \leq h_1v +
+        h_2 w$, if $Z$ is orthogonal at precision $v$ and $Q$ is its
+        orthogonal QR factor computed by MGS at precision $w$.
+    \end{itemize}    
+\end{proof}
+
+\begin{theorem}
+    Theorem 4.2 Suppose that $A = ZDZ\tp$ is computed by any eigensolver
+    in LAPACK or EISPACK in precision $v$ and $Q \in \mathbb{R}^{n
+    \times n}$ is computed by using the MGS method to $Z$ in 
+    precision $\omega(\omega \ll v)$. Then there exists a constant
+    $\gamma_1 \equiv \gamma_1(n)$ such that 
+    $$
+        \|\operatorname{off}\left(Q^T A Q\right)\|_F \leq \gamma_1\|A\| v
+    $$
+\end{theorem}
+
+\begin{proof}
+    {Outline of proof}
+    \ 
+
+    \begin{itemize}
+        \item Notice the important inequality: $\fnorm{\off(Q\tp AQ)}
+        \leq \fnorm{Q\tp A Q - D}$\footnote{This is due to the $\off$
+        operator remove all the diagonals, whereas $Q\tp A Q - D$ will
+        not result all the diagonal entries to be zero. In fact, this is
+        true for all diagonal matrices $D$, and the equality is attained
+        for $D = \diag(\diag(Q\tp AQ))$.}.
+        \item In order to relate this theorem with
+        lemma~\ref{lemma.4-1}, we write 
+        \begin{equation}\notag
+            \fnorm{Q\tp A Q - D} \leq \fnorm{(Q-Z)\tp A (Q-Z)} 
+            + 2\fnorm{(Q-Z)\tp AZ} + \fnorm{Z\tp A Z - D}
+        \end{equation}
+        \item We have already construct a bound on $\fnorm{Q-Z}$ by
+        lemma~\ref{lemma.4-1}. Remain to construct bound on $\fnorm{Z\tp
+        A Z - D}$.
+        \item Notice the expression $D=(Z+\delta Z)\tp (A + E)(Z +
+        \delta Z)$ from lemma~\ref{lemma.2-2}. Since we have the bound
+        for $\norm{Z}, \norm{\delta Z}, \norm{E}$ and $\norm{Q-Z}$, we
+        can construct the finalized bound.
+    \end{itemize}
+\end{proof}
+
+The following two theorems gives the sufficient condition(s) on the
+quadratic convergence of apply Jacobi algorithm to the preconditioned
+matrix $T\iter{0} = Q\tp A Q$.
+
+\begin{theorem}\label{thm.4-3}
+    Theorem 4.3 Let $T^{(k)}$ be the matrix $T$ after $k$ Jacobi updates
+    in Algorithm $4.1$ with $T^{(0)}=$ $Q^T A Q$. Suppose $\omega \ll v$
+    and 
+    $$
+        \min_{\lambda_i\left(T^{(0)}\right) 
+        \neq \lambda_j\left(T^{(0)}\right)}
+        \left|\lambda_i\left(T^{(0)}\right)
+        -\lambda_j\left(T^{(0)}\right)\right| \geq d>0 
+    $$
+    \bf{If $\gamma_1\|A\| v<d /(4 \sqrt{2})$} for some constant
+    $\gamma_1=\gamma_1(n)$, then we have 
+    $$
+        \|\operatorname{off}\left(T^{(N)}\right)
+        \|_F \leq \frac{\sqrt{34 / 9}}{d}
+        \|\operatorname{off}\left(T^{(0)}\right)\|_F^2,
+    $$
+    where $N=n(n-1) / 2$.
+\end{theorem}
+
+\begin{proof}
+    [Outline of proof]
+    We know that from previous theorem that, there exist a $\gamma_1$,
+    such that 
+    \begin{equation}\notag
+        \fnorm{\off(Q\tp A Q)} 
+        = \fnorm{\off(T\iter{0})}\leq \gamma_1 \norm{A}v.
+    \end{equation}
+    If we have $\gamma_1 \norm{A}v \leq d/(4\sqrt{2})$, then we have 
+    \begin{equation}\notag
+        \fnorm{\off(T\iter{0})} \leq d/(4\sqrt{2})
+    \end{equation}
+    apply the Lemma~\ref{lemma.3-3} with $k = 0$, we have 
+    \begin{itemize}
+        \item $\Egap{T\iter{0}} \geq d$ (by assumption)
+        \item $\fnorm{\off(T\iter{0})} \leq d/4\sqrt{2}$ by assumption
+        and previous theorem.
+    \end{itemize}
+    Hence we have the quadratic convergence.
+\end{proof}
+
+\begin{theorem}
+    Theorem 4.4 Let $T^{(k)}$ be the matrix $T$ after $k$ Jacobi updates in Algorithm $4.1$ with $T^{(0)}=$ $Q^T A Q$. Suppose $\omega \ll v$ and
+    $$
+    \min _{\lambda_i(A) \neq \lambda_j(A)}\left|\lambda_i(A)-\lambda_j(A)\right| \geq d>0 .
+    $$
+    If $2 \gamma_2\|A\| \omega \leq \rho_1 d$ for some constant $\gamma_2=\gamma_2(n)$ and $0<\rho_1<1$, and $\gamma_1\|A\| v<\left(1-\rho_1\right) d /(4 \sqrt{2})$ for some constant $\gamma_1=\gamma_1(n)$, then we have
+    $$
+    \left\|\operatorname{off}\left(T^{(N)}\right)\right\|_F \leq \frac{\sqrt{34 / 9}}{\left(1-\rho_1\right) d}\left\|\operatorname{off}\left(T^{(0)}\right)\right\|_F^2
+    $$
+\end{theorem}
+
+\begin{proof}
+    Let $d_A \leq \Egap{A}$, and 
+    suppose we have 
+    \begin{equation}\notag
+        2\gamma_1 \norm{A} w \leq \rho_1 d_A
+    \end{equation}
+    for some $0\leq \rho_1 \leq 1$, then we have 
+    \begin{equation}\label{eq.11}
+        (1-\rho_1)d_{A} \leq d_{T\iter{0}}.
+    \end{equation}
+    The sufficient condition for the algorithm to converge that related
+    to $d_{T\iter{0}}$ is the following:
+    \begin{equation}\label{eq.12}\tag{AIM}
+        \gamma_1 \norm{A} v \leq \frac{d_{T\iter{0}}}{4\sqrt{2}}.
+    \end{equation}
+    From equation~\eqref{eq.11}, we have 
+    \begin{equation}\label{eq.13}
+        \frac{(1-\rho_1)d_A}{4\sqrt{2}} 
+        \leq \frac{d_{T\iter{0}}}{4\sqrt{2}}.
+    \end{equation}
+    In order to satisfies \eqref{eq.12}, we need 
+    \begin{equation}\notag
+        \gamma_1\norm{A}v \leq \frac{(1-\rho_1)d_A}{4\sqrt{2}}.
+    \end{equation}
+    Hence if we precondition the matrix $A$ by $Q\tp A Q$, then by
+    Thm~\ref{thm.4-3}, 
+    \begin{equation}\notag
+        \fnorm{\off(Q\tp A Q)} = \fnorm{\off(T\iter{0})} 
+        \leq \gamma_1\norm{A}v \leq \frac{(1-\rho_1)d_A}{4\sqrt{2}}
+        \leq \frac{d_{T\iter{0}}}{4\sqrt{2}},
+    \end{equation}
+    which ensures the quadratic convergence by relating to the eigengap
+    of $A$ rather than $Q\tp A Q$.
+\end{proof}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Supplements}
+
+In the proof of this lemma, there is a statement:
+\begin{claim}{}{}
+    Suppose $Z$ and $Q$ are the matrices from Lemma~4.1, then 
+    \begin{align}
+        & \lambda_{\max}(Z\tp Z) \leq 
+        1 + (2\norm{\delta Z}\norm{Z} + \norm{\delta Z}^2),
+        \label{eq.1.1}\\
+        & \lambda_{\min}(Z\tp Z) \geq 
+        1 - (2\norm{\delta Z}\norm{Z} + \norm{\delta Z}^2).
+        \label{eq.1.2}
+    \end{align}
+\end{claim}
+We will present a proof of this:
+\begin{proof}
+    We need the following result. From Lemma~\ref{lemma.1.1}, we have $Z
+    + \delta Z$ is orthogonal. Moreover, we have 
+    \begin{equation}\label{eq.1.3}
+        \norm{Z}\leq\norm{Z+\delta Z}+{\delta Z} = 1+\norm{\delta Z}.
+    \end{equation}
+
+    \emph{For Eq.~\eqref{eq.1.1}.} From \eqref{eq.1.3}, we have
+    $\norm{Z} - \norm{\delta Z} \leq 1$. Then taking the square of both
+    sides, we have 
+    \begin{equation}\notag
+        \norm{Z}^2 - 2\norm{Z}\norm{\delta Z} + \norm{\delta Z}^2 \leq 1
+    \end{equation}
+    Moving around the equation, we have 
+    \begin{equation}\notag
+        \lambda_{\max}(Z\tp Z) = \norm{Z}^2 \leq 
+        1 + 2\norm{Z}\norm{\delta Z} - \norm{\delta Z}^2 \leq 
+        1 + 2\norm{Z}\norm{\delta Z} + \norm{\delta Z}^2.
+    \end{equation}
+
+    \emph{For Eq.~\eqref{eq.1.2}.}  Noticing the following lemma 
+    \begin{lemma}
+        If $A$ and $A + E$ are $n\times n$ real symmetric matrices, then 
+        \begin{equation}\notag
+            \abs{\lambda_k(A + E) - \lambda_k(A)} \leq \norm{E}
+        \end{equation}
+        for $k = 1,2,\dots,n$.
+    \end{lemma}
+
+    Let us consider $(Z + \delta Z)\tp(Z + \delta Z) = Z\tp Z + Z\tp
+    \delta Z + \delta Z\tp Z + \delta Z \tp \delta Z$. If we let $A+E
+    =(Z + \delta Z)\tp(Z + \delta Z)$ and $A=Z\tp Z$, then apparently,
+    this $A$ and $A + E$ satisfies the condition of above lemma, then 
+    \begin{equation}\notag
+        \begin{aligned}
+            1 = \lambda_{\min}((Z + \delta Z)\tp(Z + \delta Z)) 
+            & \leq \lambda_{\min}(Z\tp Z) + \norm{Z\tp
+            \delta Z + \delta Z\tp Z + \delta Z \tp \delta Z} \\
+            & \leq \lambda_{\min}(Z\tp Z)  + 
+            (2\norm{Z}\norm{\delta Z} + \norm{\delta Z}^2) \\
+            \implies \lambda_{\min}(Z\tp Z) & \geq 
+            1 - (2\norm{Z}\norm{\delta Z} + \norm{\delta Z}^2)
+        \end{aligned}
+    \end{equation}
+    which proves the claim.
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Bibliographies %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bibliographystyle{nj-plain}
+\bibliography{bib.bib}
+
+
+\end{document}
